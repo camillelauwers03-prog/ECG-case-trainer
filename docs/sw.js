@@ -1,5 +1,5 @@
 // Offline support: the app shell, ECGs and scripts are cached; Gemini calls always go to the network.
-const VERSION = "ecg-trainer-2026-11-20.9";
+const VERSION = "ecg-trainer-2026-11-20.10";
 const SHELL = ["./", "index.html", "cases.json", "manifest.webmanifest", "icon.svg", "apple-touch-icon.png", "icon-512.png", "icon-192.png",
   "js/ai.js", "js/gemini.js", "js/prompts.js", "js/refs.js", "js/course.js",
   "ecg/ptbxl-00001.png", "ecg/ptb-s0010.png", "ecg/mitdb-100-a.png", "ecg/mitdb-100-v.png", "ecg/cursus-pac.png", "ecg/cursus-pvc.png"];

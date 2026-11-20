@@ -58,7 +58,8 @@ export async function generateJson({ prompt, image, fast }) {
     headers: viaQuery ? { "content-type": "text/plain;charset=UTF-8" } : { "content-type": "application/json", "x-goog-api-key": key },
     body: bodyFor(model)
   });
-  let viaQuery = false;
+  const VIA_KEY = "ecgtrainer:geminiViaQuery";
+  let viaQuery = false; try { viaQuery = localStorage.getItem(VIA_KEY) === "1"; } catch {}
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
     let res;
@@ -80,7 +81,7 @@ export async function generateJson({ prompt, image, fast }) {
       const data = await res.json();
       const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
       if (!text) throw new AiError("Gemini gaf een leeg antwoord. Probeer opnieuw.", "empty");
-      try { localStorage.setItem(FOUND_KEY, model); } catch {}
+      try { localStorage.setItem(FOUND_KEY, model); localStorage.setItem(VIA_KEY, viaQuery ? "1" : "0"); } catch {}
       return { json: parseJson(text), model };
     }
     const errText = await res.text().catch(() => "");

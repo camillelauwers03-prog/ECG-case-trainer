@@ -1,8 +1,8 @@
-import refs from "./refs.js?v=9";
-import { feedbackPrompt, insightsPrompt, quickPrompt } from "./prompts.js?v=9";
-import { generateJson } from "./gemini.js?v=9";
+import refs from "./refs.js?v=10";
+import { feedbackPrompt, insightsPrompt, quickPrompt } from "./prompts.js?v=10";
+import { generateJson } from "./gemini.js?v=10";
 
-function withRef(caseData) {
+export function withRef(caseData) {
   const c = { ...caseData };
   const builtin = refs[c.id];
   if (builtin) Object.assign(c, builtin);
