@@ -1,4 +1,4 @@
-import course from "./course.js?v=10";
+import course from "./course.js?v=11";
 
 export function feedbackPrompt(c, reasoning, dx) {
   const ref = c.reference;

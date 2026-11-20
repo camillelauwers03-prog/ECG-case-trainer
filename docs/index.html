@@ -121,6 +121,7 @@ details.sec summary{cursor:pointer;font-family:var(--f-display);font-weight:700;
 details.sec > div{padding-top:8px;display:flex;flex-direction:column;gap:8px}
 .ref-course{border-left:3px solid var(--accent);padding-left:10px}
 .ref-extra{border-left:3px dashed var(--muted);padding-left:10px}
+.skip{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.25);flex-direction:column;gap:2px}
 .thinking{display:flex;gap:10px;align-items:center;color:var(--muted)}
 .pulse{width:64px;height:20px}
 .pulse path{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:120;stroke-dashoffset:120;animation:draw 1.4s linear infinite}
@@ -247,13 +248,13 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot"><span class="mono">Versie 2026-11-20.10</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.11</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
 <script type="module">
-import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=10";
-import { settings } from "./js/gemini.js?v=10";
+import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=11";
+import { settings } from "./js/gemini.js?v=11";
 (() => {
 "use strict";
 const $ = (s, el = document) => el.querySelector(s);
@@ -340,6 +341,7 @@ const refOf = (c, a) => (a && a.reference) || c.reference || {};
 function nextCase(id) {
   state.current = id ? caseById(id) : pickCase();
   state.feedback = null;
+  state.busy = false; state.pendingId = null; // a running analysis keeps going in the background and is still saved
   if (state.current) state.lastCaseId = state.current.id;
   renderPractice();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -546,21 +548,24 @@ async function submit() {
   if (!reasoning || !dx) return;
   const msg = $("#submitMsg"), btn = $("#submitBtn");
   const attempt = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), caseId: c.id, topic: c.topic, source: c.source.kind, at: new Date().toISOString(), reasoning, finalDiagnosis: dx, verdict: null, feedback: null };
-  state.busy = true; btn.disabled = true;
+  state.busy = true; state.pendingId = attempt.id; btn.disabled = true;
+  const here = () => state.pendingId === attempt.id && state.current === c;
+  const skipHtml = `<button class="btn primary big skip" type="button" data-skip>Volgende ECG → <span style="font-weight:400;font-size:.85rem">(analyse loopt verder en wordt bewaard)</span></button>`;
+  msg.onclick = e => { if (e.target.closest("[data-skip]")) nextCase(); };
   // Instant: the reference answer is known locally, so show it before any network call.
   const instRef = (() => { try { const { _url, image: _i, ...cd } = c; return withRef(cd).reference || {}; } catch { return {}; } })();
   const instHtml = `<div class="card" style="gap:10px"><div class="eyebrow">Meteen: de juiste diagnose</div>
     <div><b>Jouw diagnose:</b> ${esc(dx)}</div>
     <div><b>Referentie:</b> ${esc(instRef.diagnosis || "geen gevalideerde referentie voor deze case")}</div>
     ${(instRef.known_facts || []).length ? `<details class="sec"><summary>Gekende feiten uit de bron</summary><div>${li(instRef.known_facts)}</div></details>` : ""}
-    <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>Gemini beoordeelt je antwoord. Een korte beoordeling volgt binnen enkele seconden, de volledige analyse daarna.</span></div></div>`;
+    <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>Gemini beoordeelt je antwoord. Een korte beoordeling volgt binnen enkele seconden, de volledige analyse daarna.</span></div></div>${skipHtml}`;
   msg.innerHTML = instHtml;
   try {
     const { _url, image: _img, ...caseData } = c;
     // Fast first take (diagnosis only, no image) runs next to the full analysis.
     let quickShown = false;
     getQuick(caseData, reasoning, dx).then(q => {
-      if (!state.busy) return;
+      if (!here()) return;
       quickShown = true;
       const qv = ["correct", "gedeeltelijk", "fout"].includes(q.quick.diagnosis_verdict) ? q.quick.diagnosis_verdict : "fout";
       const ref = q.reference || {};
@@ -568,7 +573,7 @@ async function submit() {
         <div class="verdict ${qv}"><span class="tag">${VLABEL[qv]}</span><div><b>Jouw diagnose:</b> ${esc(dx)}<br>${esc(q.quick.summary || "")}</div></div>
         <div class="muted" style="font-size:.9rem">Referentie: <b>${esc(ref.diagnosis || "geen gevalideerde referentie")}</b></div>
         ${q.quick.key_tip ? `<div><b>Leerpunt:</b> ${esc(q.quick.key_tip)}</div>` : ""}
-        <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>De volledige analyse van je redenering en het ECG volgt zo...</span></div></div>`;
+        <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>De volledige analyse van je redenering en het ECG volgt zo...</span></div></div>${skipHtml}`;
     }).catch(e => console.warn("quick", e));
     let image = null;
     try { image = await blobToBase64(await imageBlob(c)); } catch (e) { console.warn("image", e); }
@@ -582,15 +587,17 @@ async function submit() {
     attempt.mistakes = (fb.mistake_tags || []).map(m => ({ category: String(m.category || "").slice(0, 60), detail: String(m.detail || "").slice(0, 400) }));
     await store.addAttempt(attempt);
     LS.set("draft:" + c.id, null);
+    if (!here()) { refreshInsights(); if (location.hash === "#voortgang" || location.hash === "#aandachtspunten") route(); return; }
     state.feedback = { fb, attempt };
     renderPractice();
     $("#feedback").scrollIntoView({ behavior: "smooth", block: "start" });
     refreshInsights();
   } catch (e) {
     console.warn(e);
+    if (!here()) return;
     const why = (e && e.message) || "Er ging iets mis. Je tekst staat er nog; probeer opnieuw.";
     msg.innerHTML = (quickShown ? msg.innerHTML.replace(/<div class="thinking">[\s\S]*?<\/div><\/div>$/, "</div>") : "") + `<div class="notice">${esc(why)}${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>`;
-  } finally { state.busy = false; if (btn) btn.disabled = false; }
+  } finally { if (state.pendingId === attempt.id) { state.busy = false; state.pendingId = null; if (btn) btn.disabled = false; } }
 }
 
 /* ---------- second opinion: open Claude with everything needed ---------- */
@@ -904,7 +911,7 @@ async function start() {
 function confirmLeave() { return true; }
 start();
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=10", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=11", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
   let reloaded = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && !document.querySelector("#reasoning")?.value) { reloaded = true; location.reload(); } });
 }
