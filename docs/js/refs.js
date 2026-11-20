@@ -801,5 +801,100 @@ export default {
    "11. Ritmestoornissen > Aanpak ritmestoornis > niet-farmacologisch"
   ],
   "course_figure": null
+ },
+ "mitdb-205-vt": {
+  "reference": {
+   "diagnosis": "Ventriculaire tachycardie: salvo's van brede ventriculaire complexen (ongeveer 130/min) met één sinusslag ertussen",
+   "known_facts": [
+    "Ritmeannotatie MIT-BIH: '(VT' (ventriculaire tachycardie) vanaf 1460,5 s.",
+    "Slag-voor-slag annotaties door twee cardiologen: 19 ventriculaire slagen (V) en 1 normale slag (N) in deze strook.",
+    "Frequentie van de ventriculaire slagen ongeveer 132/min (mediaan RR).",
+    "Klinische nota uit de databank: de PVC's hebben twee vormen."
+   ],
+   "status": "expert-annotatie",
+   "status_note": "Ritme- en slagannotaties door experts gevalideerd. Basislijnfilter 0,5 Hz toegepast."
+  },
+  "course_sections": [
+   "11. Ritmestoornissen > bespreking ritmestoornissen > breed QRS tachycardie > VT",
+   "11. Ritmestoornissen > bespreking ritmestoornissen > plotse cardiale dood"
+  ],
+  "course_figure": null
+ },
+ "vfdb-420-vt": {
+  "reference": {
+   "diagnosis": "Aanhoudende ventriculaire tachycardie (monomorfe, snelle brede-complex-tachycardie)",
+   "known_facts": [
+    "Ritmeannotatie: '(VT' van 1430 tot ongeveer 1591 s, dus deze strook valt midden in een aanhoudende VT-episode van meer dan 2,5 minuten."
+   ],
+   "status": "expert-annotatie",
+   "status_note": "Ritmeannotaties door experts (MIT-BIH Malignant Ventricular Ectopy Database). Deze databank bevat geen slag-per-slag annotaties en geen namen van de afleidingen. Basislijnfilter 0,5 Hz toegepast voor de leesbaarheid."
+  },
+  "course_sections": [
+   "11. Ritmestoornissen > bespreking ritmestoornissen > breed QRS tachycardie > VT",
+   "11. Ritmestoornissen > bespreking ritmestoornissen > plotse cardiale dood"
+  ],
+  "course_figure": null
+ },
+ "vfdb-427-vt": {
+  "reference": {
+   "diagnosis": "Ventriculaire tachycardie (zeer snel, regelmatig, brede complexen)",
+   "known_facts": [
+    "Ritmeannotatie: '(VT' van 648,5 tot ongeveer 1533 s (lange aanhoudende VT-episode)."
+   ],
+   "status": "expert-annotatie",
+   "status_note": "Ritmeannotaties door experts (MIT-BIH Malignant Ventricular Ectopy Database). Deze databank bevat geen slag-per-slag annotaties en geen namen van de afleidingen. Basislijnfilter 0,5 Hz toegepast voor de leesbaarheid."
+  },
+  "course_sections": [
+   "11. Ritmestoornissen > bespreking ritmestoornissen > breed QRS tachycardie > VT",
+   "11. Ritmestoornissen > bespreking ritmestoornissen > plotse cardiale dood"
+  ],
+  "course_figure": null
+ },
+ "mitdb-207-vfl": {
+  "reference": {
+   "diagnosis": "Ventrikelflutter (zeer snelle, sinusoïdale ventriculaire activiteit zonder herkenbare QRS-T)",
+   "known_facts": [
+    "Ritmeannotatie MIT-BIH: '(VFL' (ventrikelflutter) van 1540,9 tot ongeveer 1639 s; deze strook valt daarbinnen.",
+    "Na deze langste flutterepisode volgt een idioventriculair ritme (klinische nota uit de databank).",
+    "Onderliggend ritme elders in de opname: sinusritme met eerstegraads AV-blok en LBTB, multiforme PVC's."
+   ],
+   "status": "expert-annotatie",
+   "status_note": "Ritmeannotaties door experts gevalideerd. Basislijnfilter 0,5 Hz toegepast."
+  },
+  "course_sections": [
+   "11. Ritmestoornissen > bespreking ritmestoornissen > breed QRS tachycardie > VT",
+   "11. Ritmestoornissen > bespreking ritmestoornissen > plotse cardiale dood"
+  ],
+  "course_figure": null
+ },
+ "vfdb-422-vf": {
+  "reference": {
+   "diagnosis": "Ventrikelfibrillatie (chaotische, onregelmatige activiteit zonder herkenbare QRS-complexen)",
+   "known_facts": [
+    "Ritmeannotatie: '(VFIB' vanaf 1535 s (ongeveer 8 minuten), voorafgegaan door een VT-episode van ruim 3 minuten."
+   ],
+   "status": "expert-annotatie",
+   "status_note": "Ritmeannotaties door experts (MIT-BIH Malignant Ventricular Ectopy Database). Deze databank bevat geen slag-per-slag annotaties en geen namen van de afleidingen. Basislijnfilter 0,5 Hz toegepast voor de leesbaarheid."
+  },
+  "course_sections": [
+   "11. Ritmestoornissen > bespreking ritmestoornissen > breed QRS tachycardie > VT",
+   "11. Ritmestoornissen > bespreking ritmestoornissen > plotse cardiale dood"
+  ],
+  "course_figure": null
+ },
+ "vfdb-426-vf": {
+  "reference": {
+   "diagnosis": "Ventrikelfibrillatie (fijne, laag-amplitude fibrillatie)",
+   "known_facts": [
+    "Ritmeannotatie: '(VF' van 645,7 tot ongeveer 1166 s; deze strook valt daarbinnen."
+   ],
+   "status": "expert-annotatie",
+   "status_note": "Ritmeannotaties door experts (MIT-BIH Malignant Ventricular Ectopy Database). Deze databank bevat geen slag-per-slag annotaties en geen namen van de afleidingen. Basislijnfilter 0,5 Hz toegepast voor de leesbaarheid."
+  },
+  "course_sections": [
+   "11. Ritmestoornissen > bespreking ritmestoornissen > breed QRS tachycardie > VT",
+   "11. Ritmestoornissen > bespreking ritmestoornissen > plotse cardiale dood"
+  ],
+  "course_figure": null
  }
 };

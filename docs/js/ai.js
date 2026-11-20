@@ -1,6 +1,6 @@
-import refs from "./refs.js?v=12";
-import { feedbackPrompt, insightsPrompt, quickPrompt } from "./prompts.js?v=12";
-import { generateJson } from "./gemini.js?v=12";
+import refs from "./refs.js?v=13";
+import { feedbackPrompt, insightsPrompt, quickPrompt } from "./prompts.js?v=13";
+import { generateJson } from "./gemini.js?v=13";
 
 export function withRef(caseData) {
   const c = { ...caseData };

@@ -1014,5 +1014,155 @@
    "has_diagnosis": true
   },
   "layout": "12"
+ },
+ {
+  "id": "mitdb-205-vt",
+  "image": "ecg/mitdb-205-vt.png",
+  "leads": "Ritmestrook, 2 afleidingen (gemodificeerde II en V1), 10 s",
+  "patient": "Man, 59 jaar. Medicatie: digoxine, kinidine (Quinaglute).",
+  "context": "Ambulante (Holter) registratie.",
+  "topic": "Ventriculaire ritmestoornissen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Arrhythmia Database (PhysioNet)",
+   "record": "record 205, 1460,5-1470,5 s (360 Hz)",
+   "license": "Open Data Commons Attribution. Moody GB, Mark RG. The impact of the MIT-BIH Arrhythmia Database. IEEE Eng Med Biol 2001;20(3):45-50.",
+   "url": "https://physionet.org/content/mitdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  },
+  "layout": "strip",
+  "leadNames": [
+   "MLII",
+   "V1"
+  ]
+ },
+ {
+  "id": "vfdb-420-vt",
+  "image": "ecg/vfdb-420-vt.png",
+  "leads": "Ritmestrook, 2 afleidingen, 10 s",
+  "patient": "Niet vermeld in de databank.",
+  "context": "Langdurige registratie bij een patiënt met maligne ventriculaire ritmestoornissen.",
+  "topic": "Ventriculaire ritmestoornissen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Malignant Ventricular Ectopy Database (PhysioNet)",
+   "record": "record 420, 1440-1450 s (250 Hz)",
+   "license": "Open Data Commons Attribution. Greenwald SD. The development and analysis of a ventricular fibrillation detector. MIT, 1986.",
+   "url": "https://physionet.org/content/vfdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  },
+  "layout": "strip",
+  "leadNames": [
+   "ECG 1",
+   "ECG 2"
+  ]
+ },
+ {
+  "id": "vfdb-427-vt",
+  "image": "ecg/vfdb-427-vt.png",
+  "leads": "Ritmestrook, 2 afleidingen, 10 s",
+  "patient": "Niet vermeld in de databank.",
+  "context": "Langdurige registratie bij een patiënt met maligne ventriculaire ritmestoornissen.",
+  "topic": "Ventriculaire ritmestoornissen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Malignant Ventricular Ectopy Database (PhysioNet)",
+   "record": "record 427, 700-710 s (250 Hz)",
+   "license": "Open Data Commons Attribution. Greenwald SD. The development and analysis of a ventricular fibrillation detector. MIT, 1986.",
+   "url": "https://physionet.org/content/vfdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  },
+  "layout": "strip",
+  "leadNames": [
+   "ECG 1",
+   "ECG 2"
+  ]
+ },
+ {
+  "id": "mitdb-207-vfl",
+  "image": "ecg/mitdb-207-vfl.png",
+  "leads": "Ritmestrook, 2 afleidingen (gemodificeerde II en V1), 10 s",
+  "patient": "Vrouw, 89 jaar. Medicatie: digoxine, kinidine (Quinaglute).",
+  "context": "Ambulante (Holter) registratie.",
+  "topic": "Ventriculaire ritmestoornissen",
+  "difficulty": "expert",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Arrhythmia Database (PhysioNet)",
+   "record": "record 207, 1560-1570 s (360 Hz)",
+   "license": "Open Data Commons Attribution. Moody GB, Mark RG. The impact of the MIT-BIH Arrhythmia Database. IEEE Eng Med Biol 2001;20(3):45-50.",
+   "url": "https://physionet.org/content/mitdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  },
+  "layout": "strip",
+  "leadNames": [
+   "MLII",
+   "V1"
+  ]
+ },
+ {
+  "id": "vfdb-422-vf",
+  "image": "ecg/vfdb-422-vf.png",
+  "leads": "Ritmestrook, 2 afleidingen, 10 s",
+  "patient": "Niet vermeld in de databank.",
+  "context": "Langdurige registratie bij een patiënt met maligne ventriculaire ritmestoornissen.",
+  "topic": "Ventriculaire ritmestoornissen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Malignant Ventricular Ectopy Database (PhysioNet)",
+   "record": "record 422, 1600-1610 s (250 Hz)",
+   "license": "Open Data Commons Attribution. Greenwald SD. The development and analysis of a ventricular fibrillation detector. MIT, 1986.",
+   "url": "https://physionet.org/content/vfdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  },
+  "layout": "strip",
+  "leadNames": [
+   "ECG 1",
+   "ECG 2"
+  ]
+ },
+ {
+  "id": "vfdb-426-vf",
+  "image": "ecg/vfdb-426-vf.png",
+  "leads": "Ritmestrook, 2 afleidingen, 10 s",
+  "patient": "Niet vermeld in de databank.",
+  "context": "Langdurige registratie bij een patiënt met maligne ventriculaire ritmestoornissen.",
+  "topic": "Ventriculaire ritmestoornissen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Malignant Ventricular Ectopy Database (PhysioNet)",
+   "record": "record 426, 800-810 s (250 Hz)",
+   "license": "Open Data Commons Attribution. Greenwald SD. The development and analysis of a ventricular fibrillation detector. MIT, 1986.",
+   "url": "https://physionet.org/content/vfdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  },
+  "layout": "strip",
+  "leadNames": [
+   "ECG 1",
+   "ECG 2"
+  ]
  }
 ]

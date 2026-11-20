@@ -122,6 +122,8 @@ details.sec > div{padding-top:8px;display:flex;flex-direction:column;gap:8px}
 .ref-course{border-left:3px solid var(--accent);padding-left:10px}
 .ref-extra{border-left:3px dashed var(--muted);padding-left:10px}
 .skip{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.25);flex-direction:column;gap:2px}
+#toast{position:fixed;left:12px;right:12px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:50;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:8px;max-width:520px;margin:0 auto}
+#toast[hidden]{display:none}
 .thinking{display:flex;gap:10px;align-items:center;color:var(--muted)}
 .pulse{width:64px;height:20px}
 .pulse path{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:120;stroke-dashoffset:120;animation:draw 1.4s linear infinite}
@@ -248,13 +250,13 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot"><span class="mono">Versie 2026-11-20.12</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.13</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
 <script type="module">
-import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=12";
-import { settings } from "./js/gemini.js?v=12";
+import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=13";
+import { settings } from "./js/gemini.js?v=13";
 (() => {
 "use strict";
 const $ = (s, el = document) => el.querySelector(s);
@@ -336,6 +338,24 @@ function pickCase() {
 }
 function imgSrc(c) { return c._url || c.image || ""; }
 const refOf = (c, a) => (a && a.reference) || c.reference || {};
+
+/* ---------- open a saved analysis, and tell when a background one is ready ---------- */
+function openAttempt(id) {
+  const a = state.attempts.find(x => x.id === id), c = a && caseById(a.caseId);
+  if (!a || !c || !a.feedback) return;
+  state.current = c; state.lastCaseId = c.id; state.busy = false; state.pendingId = null;
+  state.feedback = { fb: a.feedback, attempt: a };
+  if (location.hash !== "#oefenen") location.hash = "oefenen";
+  renderPractice();
+  setTimeout(() => { const f = $("#feedback"); if (f) f.scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
+}
+function toast(html, onOpen) {
+  let t = $("#toast");
+  if (!t) { t = document.createElement("div"); t.id = "toast"; document.body.appendChild(t); }
+  t.innerHTML = html; t.hidden = false;
+  t.onclick = e => { if (e.target.closest("[data-x]")) { t.hidden = true; return; } if (e.target.closest("[data-go]")) { t.hidden = true; onOpen && onOpen(); } };
+  clearTimeout(t._h); t._h = setTimeout(() => { t.hidden = true; }, 20000);
+}
 
 /* ---------- practice view ---------- */
 function nextCase(id) {
@@ -550,7 +570,7 @@ async function submit() {
   const attempt = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), caseId: c.id, topic: c.topic, source: c.source.kind, at: new Date().toISOString(), reasoning, finalDiagnosis: dx, verdict: null, feedback: null };
   state.busy = true; state.pendingId = attempt.id; btn.disabled = true;
   const here = () => state.pendingId === attempt.id && state.current === c;
-  const skipHtml = `<button class="btn primary big skip" type="button" data-skip>Volgende ECG → <span style="font-weight:400;font-size:.85rem">(analyse loopt verder en wordt bewaard)</span></button>`;
+  const skipHtml = `<button class="btn primary big skip" type="button" data-skip>Volgende ECG → <span style="font-weight:400;font-size:.85rem">(analyse loopt verder: je krijgt een melding, en je vindt ze bij Voortgang › Mijn analyses)</span></button>`;
   msg.onclick = e => { if (e.target.closest("[data-skip]")) nextCase(); };
   // Instant: the reference answer is known locally, so show it before any network call.
   const instRef = (() => { try { const { _url, image: _i, ...cd } = c; return withRef(cd).reference || {}; } catch { return {}; } })();
@@ -587,14 +607,18 @@ async function submit() {
     attempt.mistakes = (fb.mistake_tags || []).map(m => ({ category: String(m.category || "").slice(0, 60), detail: String(m.detail || "").slice(0, 400) }));
     await store.addAttempt(attempt);
     LS.set("draft:" + c.id, null);
-    if (!here()) { refreshInsights(); if (location.hash === "#voortgang" || location.hash === "#aandachtspunten") route(); return; }
+    if (!here()) {
+      refreshInsights(); if (location.hash === "#voortgang" || location.hash === "#aandachtspunten") route();
+      toast(`<div><b>Analyse klaar</b> · ${esc(c.topic)} · <span class="pill ${attempt.verdict}">${VLABEL[attempt.verdict]}</span></div><div class="row"><button class="btn primary" type="button" data-go>Bekijk</button><button class="btn" type="button" data-x>Later</button></div>`, () => openAttempt(attempt.id));
+      return;
+    }
     state.feedback = { fb, attempt };
     renderPractice();
     $("#feedback").scrollIntoView({ behavior: "smooth", block: "start" });
     refreshInsights();
   } catch (e) {
     console.warn(e);
-    if (!here()) return;
+    if (!here()) { toast(`<div><b>Analyse mislukt</b> · ${esc(c.topic)}: ${esc((e && e.message) || "")}</div><div class="row"><button class="btn" type="button" data-x>Sluiten</button></div>`); return; }
     const why = (e && e.message) || "Er ging iets mis. Je tekst staat er nog; probeer opnieuw.";
     msg.innerHTML = (quickShown ? msg.innerHTML.replace(/<div class="thinking">[\s\S]*?<\/div><\/div>$/, "</div>") : "") + `<div class="notice">${esc(why)}${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>`;
   } finally { if (state.pendingId === attempt.id) { state.busy = false; state.pendingId = null; if (btn) btn.disabled = false; } }
@@ -814,8 +838,9 @@ function renderDashboard() {
   <div class="card"><h3>Per onderwerp</h3><p class="muted" style="margin:0;font-size:.85rem">Zwakste onderwerpen bovenaan. Groen correct, oranje gedeeltelijk, rood fout.</p>${topicRows}</div>
   <div class="card"><h3>Doorheen de tijd</h3><p class="muted" style="margin:0;font-size:.85rem">Gemiddelde score per dag (correct = 100%, gedeeltelijk = 50%).</p><div class="chart-wrap">${chart}</div></div>
   <div class="card"><h3>Nog niet correct</h3>${wrongCases.map(w => { const c = caseById(w.id); return c ? `<div class="list-item"><div class="row" style="flex-wrap:nowrap"><img class="thumb" src="${esc(imgSrc(c))}" alt=""><div><b>${esc(c.topic)}</b><div class="muted" style="font-size:.85rem">Laatst: ${esc(w.last.finalDiagnosis)}</div></div></div><div class="row"><span class="pill ${w.last.verdict}">${VLABEL[w.last.verdict]}</span><button class="btn" data-retry="${esc(c.id)}">Opnieuw</button></div></div>` : ""; }).join("") || `<p class="muted" style="margin:0">Alles wat je maakte, is intussen correct.</p>`}</div>
-  <div class="card"><h3>Geschiedenis</h3>${[...A].reverse().slice(0, 30).map(a => { const c = caseById(a.caseId); return `<details class="sec"><summary><span class="pill ${a.verdict}">${VLABEL[a.verdict]}</span> ${esc(a.topic)} <span class="muted mono">${esc(new Date(a.at).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" }))}</span></summary><div><div><b>Jouw diagnose:</b> ${esc(a.finalDiagnosis)}</div><div><b>Referentie:</b> ${esc((a.reference && a.reference.diagnosis) || "te verifiëren")}</div><div class="muted">${esc(a.feedback ? a.feedback.verdict_explanation : "")}</div><div style="white-space:pre-wrap;font-size:.9rem;border-left:3px solid var(--line);padding-left:10px">${esc(a.reasoning)}</div></div></details>`; }).join("")}</div>` + backupCard();
+  <div class="card" id="geschiedenis"><h3>Mijn analyses</h3><p class="muted" style="margin:0;font-size:.85rem">Al je ingediende ECG's met de volledige feedback, nieuwste bovenaan.</p>${[...A].reverse().slice(0, 30).map(a => { const c = caseById(a.caseId); return `<details class="sec"><summary><span class="pill ${a.verdict}">${VLABEL[a.verdict]}</span> ${esc(a.topic)} <span class="muted mono">${esc(new Date(a.at).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" }))}</span></summary><div><div><b>Jouw diagnose:</b> ${esc(a.finalDiagnosis)}</div><div><b>Referentie:</b> ${esc((a.reference && a.reference.diagnosis) || "te verifiëren")}</div><div class="muted">${esc(a.feedback ? a.feedback.verdict_explanation : "")}</div><div style="white-space:pre-wrap;font-size:.9rem;border-left:3px solid var(--line);padding-left:10px">${esc(a.reasoning)}</div>${a.feedback ? `<button class="btn primary" type="button" data-open="${esc(a.id)}">Volledige analyse bekijken</button>` : ""}</div></details>`; }).join("")}</div>` + backupCard();
   wireBackup();
+  el.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openAttempt(b.dataset.open));
   el.querySelectorAll("[data-retry]").forEach(b => b.onclick = () => { location.hash = "oefenen"; nextCase(b.dataset.retry); });
 }
 const sum = s => s.correct + s.gedeeltelijk + s.fout;
@@ -911,7 +936,7 @@ async function start() {
 function confirmLeave() { return true; }
 start();
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=12", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=13", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
   let reloaded = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && !document.querySelector("#reasoning")?.value) { reloaded = true; location.reload(); } });
 }
