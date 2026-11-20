@@ -1,0 +1,82 @@
+[
+ {
+  "id": "ptbxl-00001",
+  "image": "ecg/ptbxl-00001.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 56 jaar",
+  "context": "Routine-ECG. Geen verdere klinische gegevens beschikbaar in de dataset.",
+  "topic": "Normaal ECG",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 1 (00001_lr, 100 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  }
+ },
+ {
+  "id": "ptb-s0010",
+  "image": "ecg/ptb-s0010.png",
+  "leads": "12 afleidingen, eerste 10 s",
+  "patient": "Vrouw, 81 jaar. Diabetes mellitus. Niet-roker.",
+  "context": "Opname wegens pijn op de borst. ECG genomen 2 dagen na opname. Kreeg trombolyse bij opname.",
+  "topic": "STEMI / infarctlokalisatie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB Diagnostic ECG Database (PhysioNet)",
+   "record": "patient001 / s0010_re (1000 Hz)",
+   "license": "Open Data Commons Attribution. Bousseljot R, Kreiseler D, Schnabel A. Nutzung der EKG-Signaldatenbank CARDIODAT der PTB über das Internet. Biomed Tech 1995;40(S1):317.",
+   "url": "https://physionet.org/content/ptbdb/1.0.0/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  }
+ },
+ {
+  "id": "mitdb-100-a",
+  "image": "ecg/mitdb-100-a.png",
+  "leads": "Ritmestrook, 2 afleidingen (gemodificeerde II en V5), 10 s",
+  "patient": "Man, 69 jaar. Medicatie: methyldopa (Aldomet), propranolol (Inderal).",
+  "context": "Ambulante (Holter) registratie.",
+  "topic": "Extrasystolen",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Arrhythmia Database (PhysioNet)",
+   "record": "record 100, 180-190 s (360 Hz)",
+   "license": "Open Data Commons Attribution. Moody GB, Mark RG. The impact of the MIT-BIH Arrhythmia Database. IEEE Eng Med Biol 2001;20(3):45-50.",
+   "url": "https://physionet.org/content/mitdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  }
+ },
+ {
+  "id": "mitdb-100-v",
+  "image": "ecg/mitdb-100-v.png",
+  "leads": "Ritmestrook, 2 afleidingen (gemodificeerde II en V5), 10 s",
+  "patient": "Man, 69 jaar. Medicatie: methyldopa (Aldomet), propranolol (Inderal).",
+  "context": "Ambulante (Holter) registratie, een ander moment uit dezelfde opname.",
+  "topic": "Extrasystolen",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "MIT-BIH Arrhythmia Database (PhysioNet)",
+   "record": "record 100, 1513-1523 s (360 Hz)",
+   "license": "Open Data Commons Attribution. Moody GB, Mark RG. The impact of the MIT-BIH Arrhythmia Database. IEEE Eng Med Biol 2001;20(3):45-50.",
+   "url": "https://physionet.org/content/mitdb/1.0.0/"
+  },
+  "reference": {
+   "status": "expert-annotatie",
+   "has_diagnosis": true
+  }
+ }
+]

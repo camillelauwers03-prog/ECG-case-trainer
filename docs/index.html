@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ECG Case Trainer</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ECG Trainer">
+<meta name="theme-color" content="#c8442f">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one working column (ECG on top, writing below), tab bar at the bottom on phones, at the top on wide screens. */
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --ink:#15202b; --muted:#5b6672; --line:#dde2e8;
+  --accent:#c8442f; --accent-ink:#ffffff; --accent-soft:#fbe7e2;
+  --good:#1f7a4d; --good-soft:#e1f3e9; --warn:#a86400; --warn-soft:#fdf0d9; --bad:#b3261e; --bad-soft:#fbe4e2;
+  --paper:#fff6f3;
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f141a; --surface:#18202a; --ink:#e7ecf1; --muted:#9aa6b2; --line:#2b3643;
+  --accent:#f07a63; --accent-ink:#1a0c08; --accent-soft:#3a201b;
+  --good:#5fd09a; --good-soft:#163527; --warn:#f2b45a; --warn-soft:#3a2a12; --bad:#ff8a80; --bad-soft:#3d1a18; --paper:#fff6f3; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141a; --surface:#18202a; --ink:#e7ecf1; --muted:#9aa6b2; --line:#2b3643;
+  --accent:#f07a63; --accent-ink:#1a0c08; --accent-soft:#3a201b;
+  --good:#5fd09a; --good-soft:#163527; --warn:#f2b45a; --warn-soft:#3a2a12; --bad:#ff8a80; --bad-soft:#3d1a18; --paper:#fff6f3; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+img{max-width:100%}
+html{padding-top:env(safe-area-inset-top,0px)}
+html,body{background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:var(--f-body);font-size:16px;line-height:1.5;padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}
+h1,h2,h3{font-family:var(--f-display);line-height:1.2;text-wrap:balance;margin:0}
+h2{font-size:1.35rem} h3{font-size:1.05rem}
+.wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 32px;display:flex;flex-direction:column;gap:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.brand svg{flex:none}
+.brand h1{font-size:1.25rem}
+.brand small{display:block;font-family:var(--f-mono);font-size:.7rem;color:var(--muted);letter-spacing:.04em}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+nav.tabs a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px 10px;color:var(--muted);text-decoration:none;font-size:.72rem;font-weight:700}
+nav.tabs a svg{width:22px;height:22px}
+nav.tabs a[aria-current="page"]{color:var(--accent)}
+@media (min-width:860px){
+  body{padding-bottom:0}
+  nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);bottom:auto;border-top:0;border-bottom:1px solid var(--line);display:flex;justify-content:center;gap:8px}
+  nav.tabs a{flex-direction:row;font-size:.9rem;padding:12px 14px;gap:8px}
+}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--f-mono);font-size:.82rem}
+.eyebrow{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:.78rem;background:var(--surface);color:var(--muted)}
+.chip.test{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:10px 16px;font:inherit;font-weight:700;cursor:pointer;min-height:44px}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn.big{width:100%;font-size:1.05rem;padding:14px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.icon{padding:0;width:44px;display:inline-flex;align-items:center;justify-content:center}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+select,input[type=text],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+textarea{resize:vertical;line-height:1.5}
+label.lbl{font-weight:700;display:block;margin-bottom:6px}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.filters label{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.check{display:flex;align-items:center;gap:8px;font-size:.9rem}
+/* ECG viewer */
+.viewer{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.viewer .scroller{overflow:auto;max-height:70vh;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
+.viewer img{display:block;max-width:none;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.viewer .tools{position:absolute;right:8px;top:8px;display:flex;gap:6px}
+.viewer .tools .btn{background:rgba(255,255,255,.92);color:#15202b;border-color:#d7c4bf;min-height:36px;width:36px;padding:0}
+.zoomlvl{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);color:#15202b;border-radius:6px;padding:2px 8px;font-family:var(--f-mono);font-size:.75rem}
+.viewer.full{position:fixed;inset:0;z-index:50;border-radius:0;border:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.viewer.full .scroller{max-height:none;height:100%}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.92rem}
+.facts dt{color:var(--muted)} .facts dd{margin:0}
+/* Feedback */
+.verdict{display:flex;flex-direction:column;gap:8px;align-items:flex-start;border-radius:var(--r);padding:14px 16px;border:1px solid}
+.verdict.correct{background:var(--good-soft);border-color:var(--good);color:var(--ink)}
+.verdict.gedeeltelijk{background:var(--warn-soft);border-color:var(--warn)}
+.verdict.fout{background:var(--bad-soft);border-color:var(--bad)}
+.verdict .tag{font-family:var(--f-mono);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;padding:2px 8px;border-radius:4px;color:#fff;white-space:nowrap}
+.correct .tag{background:var(--good)} .gedeeltelijk .tag{background:var(--warn)} .fout .tag{background:var(--bad)}
+.fb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.fb-list{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.fb-box{border:1px solid var(--line);border-radius:8px;padding:12px;min-width:0}
+.fb-box h3{font-size:.95rem;margin-bottom:6px;display:flex;gap:8px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th{text-align:left;color:var(--muted);font-weight:700;width:34%;vertical-align:top;padding:6px 8px 6px 0;border-top:1px solid var(--line)}
+.tbl td{padding:6px 0;border-top:1px solid var(--line);vertical-align:top}
+details.sec{border-top:1px solid var(--line);padding-top:10px}
+details.sec summary{cursor:pointer;font-family:var(--f-display);font-weight:700;font-size:1.02rem;list-style-position:outside}
+details.sec > div{padding-top:8px;display:flex;flex-direction:column;gap:8px}
+.ref-course{border-left:3px solid var(--accent);padding-left:10px}
+.ref-extra{border-left:3px dashed var(--muted);padding-left:10px}
+.thinking{display:flex;gap:10px;align-items:center;color:var(--muted)}
+.pulse{width:64px;height:20px}
+.pulse path{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:120;stroke-dashoffset:120;animation:draw 1.4s linear infinite}
+@keyframes draw{to{stroke-dashoffset:-120}}
+@media (prefers-reduced-motion:reduce){.pulse path{animation:none;stroke-dashoffset:0}}
+.notice{border-radius:8px;padding:10px 12px;background:var(--warn-soft);border:1px solid var(--warn);font-size:.9rem}
+.notice.info{background:var(--accent-soft);border-color:var(--accent)}
+/* Dashboard */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px}
+.stat b{display:block;font-family:var(--f-display);font-size:1.8rem;font-variant-numeric:tabular-nums}
+.stat span{font-size:.82rem;color:var(--muted)}
+.bar{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line);min-width:80px}
+.bar i{display:block;height:100%}
+.topic-row{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,2fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:.92rem}
+.list-item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.list-item > div{min-width:0}
+.pill{font-family:var(--f-mono);font-size:.72rem;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.05em}
+.pill.correct{background:var(--good-soft);color:var(--good)} .pill.gedeeltelijk{background:var(--warn-soft);color:var(--warn)} .pill.fout{background:var(--bad-soft);color:var(--bad)}
+.pill.verif{background:var(--warn-soft);color:var(--warn)} .pill.ok{background:var(--good-soft);color:var(--good)}
+.chart-wrap{overflow-x:auto}
+/* Aandachtspunten */
+.ap-item{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.ap-item .count{font-family:var(--f-mono);font-size:.75rem;color:var(--muted)}
+.ap-item.sev-hoog{border-left:4px solid var(--bad)} .ap-item.sev-midden{border-left:4px solid var(--warn)} .ap-item.sev-laag{border-left:4px solid var(--muted)}
+.ap-item.better{border-left:4px solid var(--good)}
+.empty{text-align:center;padding:28px 16px;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center}
+.thumb{width:84px;height:56px;object-fit:cover;border-radius:6px;border:1px solid var(--line);background:var(--paper);flex:none}
+.fig{background:var(--paper);border-radius:6px;padding:6px;max-width:520px}
+.fig img{display:block;width:100%}
+.fig figcaption{color:#5b3a32;font-size:.82rem;padding-top:4px}
+footer.foot{font-size:.78rem;color:var(--muted)}
+</style>
+</head>
+<body>
+<div id="app">
+<nav class="tabs" aria-label="Hoofdmenu">
+  <a href="#oefenen" data-view="oefenen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-5 3 10 3-12 2 7h6"/></svg>Oefenen</a>
+  <a href="#aandachtspunten" data-view="aandachtspunten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>Aandachtspunten</a>
+  <a href="#voortgang" data-view="voortgang"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Voortgang</a>
+  <a href="#cases" data-view="cases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M8 4v5"/></svg>Cases</a>
+</nav>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="8" fill="var(--accent)"/><path d="M4 18h6l2-6 3 12 3-15 2 9h10" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div><h1>ECG Case Trainer</h1><small>25 MM/S · 10 MM/MV</small></div>
+    </div>
+    <span class="chip" id="syncChip">Opslag laden…</span>
+  </header>
+
+  <!-- OEFENEN -->
+  <section id="view-oefenen" data-viewsec>
+    <div class="wrap" style="padding:0">
+      <div class="card">
+        <div class="filters">
+          <label>Bron<select id="fSource"><option value="all">Alle bronnen</option><option value="database">Externe database</option><option value="eigen">Eigen oefeningen / cursus</option></select></label>
+          <label>Onderwerp<select id="fTopic"><option value="all">Alle onderwerpen</option></select></label>
+          <label>Moeilijkheid<select id="fDiff"><option value="all">Alle</option><option value="basis">Basis</option><option value="gevorderd">Gevorderd</option></select></label>
+          <label class="check" style="flex-direction:row;align-self:end;padding-bottom:10px"><input type="checkbox" id="fWrong"> Enkel eerder fout</label>
+        </div>
+      </div>
+      <div id="practice"></div>
+    </div>
+  </section>
+
+  <!-- AANDACHTSPUNTEN -->
+  <section id="view-aandachtspunten" data-viewsec hidden>
+    <div id="insights" class="wrap" style="padding:0"></div>
+  </section>
+
+  <!-- VOORTGANG -->
+  <section id="view-voortgang" data-viewsec hidden>
+    <div id="dashboard" class="wrap" style="padding:0"></div>
+  </section>
+
+  <!-- CASES -->
+  <section id="view-cases" data-viewsec hidden>
+    <div class="wrap" style="padding:0">
+      <div class="card" id="settingsCard">
+        <div><div class="eyebrow">Instellingen</div><h2>Gratis Gemini-sleutel</h2></div>
+        <p class="muted" style="margin:0">Maak een sleutel aan op <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> en plak hem hier. Hij wordt alleen op dit toestel bewaard en enkel naar Google gestuurd.</p>
+        <form id="keyForm" class="wrap" style="padding:0;gap:8px">
+          <div><label class="lbl" for="kKey">API-sleutel</label><input type="password" id="kKey" autocomplete="off" placeholder="Begint meestal met AIza…" style="font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%"></div>
+          <details><summary class="muted" style="cursor:pointer">Geavanceerd</summary><div style="padding-top:8px"><label class="lbl" for="kModel">Model (leeg = automatisch)</label><input type="text" id="kModel" placeholder="gemini-2.5-flash"></div></details>
+          <div class="row"><button class="btn primary" type="submit">Opslaan</button><button class="btn" type="button" id="kClear">Wissen</button></div>
+          <div id="keyMsg" class="muted"></div>
+        </form>
+      </div>
+      <div class="card" id="addCaseCard">
+        <div><div class="eyebrow">Eigen oefening toevoegen</div><h2>Nieuwe case uit je iPad of cursus</h2></div>
+        <p class="muted" style="margin:0">Voeg een foto of screenshot van een ECG toe, met de diagnose uit je oplossing. Een case zonder referentiediagnose krijgt het label <b>te verifiëren</b> en de feedback zegt dan uitdrukkelijk dat er geen gevalideerde referentie is.</p>
+        <form id="caseForm" class="wrap" style="padding:0;gap:12px">
+          <div><label class="lbl" for="cImg">ECG-afbeelding</label><input type="file" id="cImg" accept="image/*" required></div>
+          <div class="filters">
+            <label>Onderwerp<select id="cTopic"></select></label>
+            <label>Moeilijkheid<select id="cDiff"><option value="basis">Basis</option><option value="gevorderd">Gevorderd</option></select></label>
+          </div>
+          <div><label class="lbl" for="cPatient">Patiënt (leeftijd, geslacht)</label><input type="text" id="cPatient" placeholder="bv. Man, 64 jaar"></div>
+          <div><label class="lbl" for="cContext">Klinische context</label><textarea id="cContext" rows="2" placeholder="bv. Palpitaties sinds 2 uur, hemodynamisch stabiel"></textarea></div>
+          <div><label class="lbl" for="cDx">Referentiediagnose (uit je oplossing of cursus)</label><input type="text" id="cDx" placeholder="Leeg laten als je het niet zeker weet"></div>
+          <div><label class="lbl" for="cNotes">Uitleg uit de oplossing (optioneel)</label><textarea id="cNotes" rows="3" placeholder="Bevindingen of uitleg die bij de oplossing hoort"></textarea></div>
+          <div><label class="lbl" for="cSrc">Herkomst</label><input type="text" id="cSrc" placeholder="bv. iPad-oefening 3, of Cursus H11"></div>
+          <button class="btn primary" type="submit" id="cSave">Case opslaan</button>
+          <div id="caseMsg" class="muted"></div>
+        </form>
+      </div>
+      <div class="card">
+        <div><div class="eyebrow">Bibliotheek</div><h2>Alle cases</h2></div>
+        <div id="caseList"></div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+</div>
+</div>
+
+<script type="module">
+import { getFeedback, getInsights } from "./js/ai.js";
+import { settings } from "./js/gemini.js";
+(() => {
+"use strict";
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const TOPICS = ["Normaal ECG","Sinusritme en sinusaritmieën","Extrasystolen","Voorkamerfibrillatie","Voorkamerflutter","Supraventriculaire tachycardie","AV-blok","Bundeltakblok / hemiblok","Ventriculaire ritmestoornissen","Ischemie","STEMI / infarctlokalisatie","NSTEMI","Hypertrofie","Elektrolytenstoornissen","QT-afwijkingen","WPW","Brugada","Pacemakerritme","Andere"];
+const VLABEL = {correct:"Correct", gedeeltelijk:"Gedeeltelijk correct", fout:"Fout"};
+
+const state = { builtin: [], custom: [], attempts: [], insights: null, current: null, lastCaseId: null, feedback: null, busy: false, course: "" };
+/* ---------- storage on this device: localStorage for records, IndexedDB for images ---------- */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("ecgtrainer:" + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("ecgtrainer:" + k, JSON.stringify(v)); return true; } catch { return false; } }
+};
+const IDB = {
+  db: null,
+  open() {
+    if (this.db) return Promise.resolve(this.db);
+    return new Promise((ok, fail) => {
+      const r = indexedDB.open("ecgtrainer", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("images");
+      r.onsuccess = () => { this.db = r.result; ok(this.db); };
+      r.onerror = () => fail(r.error);
+    });
+  },
+  async put(k, blob) { const d = await this.open(); return new Promise((ok, fail) => { const t = d.transaction("images", "readwrite"); t.objectStore("images").put(blob, k); t.oncomplete = ok; t.onerror = () => fail(t.error); }); },
+  async get(k) { const d = await this.open(); return new Promise((ok, fail) => { const q = d.transaction("images").objectStore("images").get(k); q.onsuccess = () => ok(q.result); q.onerror = () => fail(q.error); }); },
+  async del(k) { const d = await this.open(); return new Promise(ok => { const t = d.transaction("images", "readwrite"); t.objectStore("images").delete(k); t.oncomplete = ok; t.onerror = ok; }); }
+};
+const store = {
+  async addAttempt(a) { state.attempts.push(a); LS.set("attempts", state.attempts); },
+  async saveInsights(ins) { state.insights = ins; LS.set("insights", ins); },
+  async addCase(c, blob) {
+    await IDB.put(c.id, blob);
+    c._url = URL.createObjectURL(blob);
+    state.custom.push(c);
+    LS.set("cases", state.custom.map(({ _url, ...x }) => x));
+  },
+  async removeCase(id) {
+    state.custom = state.custom.filter(c => c.id !== id);
+    await IDB.del(id);
+    LS.set("cases", state.custom.map(({ _url, ...x }) => x));
+  }
+};
+
+function setSync(text, ok) { const c = $("#syncChip"); c.textContent = text; c.style.color = ok ? "var(--good)" : "var(--muted)"; }
+
+async function loadData() {
+  state.attempts = LS.get("attempts", []);
+  state.insights = LS.get("insights", null);
+  state.custom = LS.get("cases", []);
+  for (const c of state.custom) {
+    try { const b = await IDB.get(c.id); if (b) c._url = URL.createObjectURL(b); } catch (e) { console.warn(e); }
+  }
+  try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch {}
+  setSync("Opgeslagen op dit toestel", true);
+}
+
+/* ---------- cases ---------- */
+const allCases = () => [...state.builtin, ...state.custom];
+const caseById = id => allCases().find(c => c.id === id);
+const lastAttemptFor = id => [...state.attempts].reverse().find(a => a.caseId === id);
+
+function eligible() {
+  const src = $("#fSource").value, topic = $("#fTopic").value, diff = $("#fDiff").value, wrong = $("#fWrong").checked;
+  return allCases().filter(c =>
+    (src === "all" || c.source.kind === src) &&
+    (topic === "all" || c.topic === topic) &&
+    (diff === "all" || c.difficulty === diff) &&
+    (!wrong || (lastAttemptFor(c.id) && lastAttemptFor(c.id).verdict !== "correct")));
+}
+function pickCase() {
+  let pool = eligible();
+  if (pool.length > 1) pool = pool.filter(c => c.id !== state.lastCaseId);
+  if (!pool.length) return null;
+  const w = pool.map(c => { const l = lastAttemptFor(c.id); return !l ? 1.6 : l.verdict === "fout" ? 3 : l.verdict === "gedeeltelijk" ? 2 : 0.7; });
+  let r = Math.random() * w.reduce((a, b) => a + b, 0);
+  for (let i = 0; i < pool.length; i++) { r -= w[i]; if (r <= 0) return pool[i]; }
+  return pool[pool.length - 1];
+}
+function imgSrc(c) { return c._url || c.image || ""; }
+const refOf = (c, a) => (a && a.reference) || c.reference || {};
+
+/* ---------- practice view ---------- */
+function nextCase(id) {
+  state.current = id ? caseById(id) : pickCase();
+  state.feedback = null;
+  if (state.current) state.lastCaseId = state.current.id;
+  renderPractice();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function sourceChip(c) {
+  if (c.source.kind === "database") return `<span class="chip">Bron: ${esc(c.source.name)}</span>`;
+  return `<span class="chip">Bron: ${esc(c.source.name || "eigen oefening")}</span>`;
+}
+function statusPill(c) {
+  if (!c.reference.diagnosis && !c.reference.has_diagnosis) return `<span class="pill verif">te verifiëren</span>`;
+  if (c.reference.status === "expert-annotatie") return `<span class="pill ok">expert-annotatie</span>`;
+  if (c.reference.status === "dataset-label") return `<span class="pill ok">dataset-label</span>`;
+  return `<span class="pill ok">eigen oplossing</span>`;
+}
+
+function renderPractice() {
+  const el = $("#practice"), c = state.current;
+  if (!c) {
+    el.innerHTML = `<div class="card empty"><h2>Geen cases voor deze filters</h2><p>Zet een filter ruimer, of voeg je eigen oefeningen toe bij Cases.</p><a class="btn" href="#cases">Case toevoegen</a></div>`;
+    return;
+  }
+  const done = state.attempts.filter(a => a.caseId === c.id).length;
+  el.innerHTML = `
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <div class="row">${sourceChip(c)}<span class="chip">${esc(c.leads || "ECG")}</span>${done ? `<span class="chip">${done}× eerder gemaakt</span>` : ""}</div>
+      <span class="mono muted">case ${esc(c.id)}</span>
+    </div>
+    <div class="viewer" id="viewer">
+      <div class="scroller" id="scroller"><img id="ecgImg" src="${esc(imgSrc(c))}" alt="ECG van deze case" draggable="false"></div>
+      <span class="zoomlvl" id="zoomLvl">100%</span>
+      <div class="tools">
+        <button class="btn" id="zOut" aria-label="Uitzoomen">−</button>
+        <button class="btn" id="zIn" aria-label="Inzoomen">+</button>
+        <button class="btn" id="zFull" aria-label="Volledig scherm">⤢</button>
+      </div>
+    </div>
+    <p class="muted mono" style="margin:0">Tip: zoom in en scroll opzij om elke afleiding te bekijken. Op je gsm werkt het best in liggende stand.</p>
+    <dl class="facts">
+      <dt>Patiënt</dt><dd>${esc(c.patient || "Niet vermeld")}</dd>
+      <dt>Context</dt><dd>${esc(c.context || "Geen klinische context beschikbaar")}</dd>
+    </dl>
+  </div>
+  ${state.feedback ? "" : `
+  <form class="card" id="answerForm">
+    <div><label class="lbl" for="reasoning">Jouw redenering en ECG-interpretatie</label>
+    <textarea id="reasoning" rows="9" placeholder="Beschrijf in je eigen woorden wat je ziet en hoe je redeneert: ritme, frequentie, as, intervallen, QRS, ST, T…" required></textarea></div>
+    <div><label class="lbl" for="finalDx">Finale diagnose</label>
+    <input type="text" id="finalDx" placeholder="Jouw diagnose" required autocomplete="off"></div>
+    ${settings.getKey() ? "" : `<div class="notice info">Om feedback te krijgen, vul je eenmalig je gratis Gemini-sleutel in bij <a href="#cases">Cases &gt; Instellingen</a>.</div>`}
+    <button class="btn primary big" type="submit" id="submitBtn">Indienen en feedback krijgen</button>
+    <div id="submitMsg"></div>
+  </form>`}
+  <div id="feedback"></div>`;
+  setupViewer();
+  const f = $("#answerForm");
+  if (f) {
+    const draft = LS.get("draft:" + c.id, null);
+    if (draft) { $("#reasoning").value = draft.r || ""; $("#finalDx").value = draft.d || ""; }
+    f.addEventListener("input", () => LS.set("draft:" + c.id, { r: $("#reasoning").value, d: $("#finalDx").value }));
+    f.addEventListener("submit", e => { e.preventDefault(); submit(); });
+  }
+  if (state.feedback) renderFeedback(state.feedback.fb, state.feedback.attempt);
+}
+
+function c_is12(img) { return state.current && /12 afleidingen/.test(state.current.leads || ""); }
+function setupViewer() {
+  const v = $("#viewer"), img = $("#ecgImg"), sc = $("#scroller");
+  let z = window.innerWidth < 700 && c_is12(img) ? 2.5 : 1;
+  requestAnimationFrame(() => apply());
+  const apply = (cx) => {
+    const ratio = sc.scrollLeft / Math.max(1, sc.scrollWidth - sc.clientWidth);
+    img.style.width = (z * 100) + "%";
+    $("#zoomLvl").textContent = Math.round(z * 100) + "%";
+    sc.scrollLeft = ratio * (sc.scrollWidth - sc.clientWidth);
+  };
+  $("#zIn").onclick = () => { z = Math.min(5, z * 1.5); apply(); };
+  $("#zOut").onclick = () => { z = Math.max(1, z / 1.5); apply(); };
+  $("#zFull").onclick = () => {
+    v.classList.toggle("full");
+    $("#zFull").textContent = v.classList.contains("full") ? "✕" : "⤢";
+    $("#zFull").setAttribute("aria-label", v.classList.contains("full") ? "Sluiten" : "Volledig scherm");
+    document.body.style.overflow = v.classList.contains("full") ? "hidden" : "";
+  };
+  img.addEventListener("dblclick", e => {
+    const r = img.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
+    z = z >= 3 ? 1 : z * 2; apply();
+    sc.scrollLeft = fx * sc.scrollWidth - sc.clientWidth / 2; sc.scrollTop = fy * sc.scrollHeight - sc.clientHeight / 2;
+  });
+  // drag to pan with mouse
+  let drag = null;
+  sc.addEventListener("mousedown", e => { drag = { x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop }; sc.style.cursor = "grabbing"; e.preventDefault(); });
+  window.addEventListener("mouseup", () => { drag = null; sc.style.cursor = ""; });
+  window.addEventListener("mousemove", e => { if (!drag) return; sc.scrollLeft = drag.l - (e.clientX - drag.x); sc.scrollTop = drag.t - (e.clientY - drag.y); });
+}
+
+async function imageBlob(c) {
+  const r = await fetch(imgSrc(c));
+  if (!r.ok) throw new Error("image " + r.status);
+  return await r.blob();
+}
+
+async function blobToBase64(blob) {
+  const url = await new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(blob); });
+  return { mimeType: blob.type || "image/png", data: String(url).split(",")[1] };
+}
+
+async function submit() {
+  if (state.busy) return;
+  const c = state.current, reasoning = $("#reasoning").value.trim(), dx = $("#finalDx").value.trim();
+  if (!reasoning || !dx) return;
+  const msg = $("#submitMsg"), btn = $("#submitBtn");
+  const attempt = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), caseId: c.id, topic: c.topic, source: c.source.kind, at: new Date().toISOString(), reasoning, finalDiagnosis: dx, verdict: null, feedback: null };
+  state.busy = true; btn.disabled = true;
+  msg.innerHTML = `<div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>Je antwoord wordt nagekeken. Dit duurt meestal 10 tot 40 seconden.</span></div>`;
+  try {
+    let image = null;
+    try { image = await blobToBase64(await imageBlob(c)); } catch (e) { console.warn("image", e); }
+    const { _url, image: _img, ...caseData } = c;
+    const data = await getFeedback(caseData, reasoning, dx, image);
+    const fb = data.feedback || {};
+    attempt.verdict = ["correct", "gedeeltelijk", "fout"].includes(fb.diagnosis_verdict) ? fb.diagnosis_verdict : "fout";
+    attempt.feedback = fb;
+    attempt.model = data.model;
+    attempt.reference = data.reference || c.reference;
+    attempt.courseFigure = data.course_figure || null;
+    attempt.mistakes = (fb.mistake_tags || []).map(m => ({ category: String(m.category || "").slice(0, 60), detail: String(m.detail || "").slice(0, 400) }));
+    await store.addAttempt(attempt);
+    LS.set("draft:" + c.id, null);
+    state.feedback = { fb, attempt };
+    renderPractice();
+    $("#feedback").scrollIntoView({ behavior: "smooth", block: "start" });
+    refreshInsights();
+  } catch (e) {
+    console.warn(e);
+    const why = (e && e.message) || "Er ging iets mis. Je tekst staat er nog; probeer opnieuw.";
+    msg.innerHTML = `<div class="notice">${esc(why)}${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>`;
+  } finally { state.busy = false; if (btn) btn.disabled = false; }
+}
+
+/* ---------- second opinion: open Claude with everything needed ---------- */
+function claudeText(attempt) {
+  const c = caseById(attempt.caseId) || state.current, ref = refOf(c, attempt), fb = attempt.feedback || {};
+  const r = fb.reasoning || {};
+  const L = (t, arr) => (arr && arr.length) ? `${t}:\n${arr.map(x => "- " + x).join("\n")}\n` : "";
+  return `Ik ben geneeskundestudent en oefen ECG's lezen. Een andere AI (Gemini) gaf feedback op mijn antwoord en ik twijfel eraan. Kan je controleren of die feedback klopt? Zeg duidelijk waar je akkoord gaat en waar niet, en waarom. Antwoord in het Nederlands. Het is een oefening, geen echte patiënt.
+
+CASE
+Patiënt: ${c.patient || "niet vermeld"}
+Context: ${c.context || "geen"}
+Registratie: ${c.leads || "?"}, 25 mm/s, 10 mm/mV
+Bron: ${c.source.name}${c.source.record ? " (" + c.source.record + ")" : ""}
+Referentiediagnose: ${ref.diagnosis || "geen gevalideerde referentie"}
+${(ref.known_facts || []).length ? "Gekende feiten uit de bron:\n" + ref.known_facts.map(f => "- " + f).join("\n") : ""}
+
+MIJN ANTWOORD
+Redenering: ${attempt.reasoning}
+Finale diagnose: ${attempt.finalDiagnosis}
+
+FEEDBACK VAN GEMINI
+Oordeel: ${VLABEL[attempt.verdict] || "?"}. ${fb.verdict_explanation || ""}
+${L("Juiste observaties", r.correct_observations)}${L("Foute observaties", r.incorrect_observations)}${L("Gemiste bevindingen", r.missed_findings)}${L("Foute interpretaties", r.incorrect_interpretations)}Uitleg diagnose: ${fb.final_diagnosis || ""}
+
+(Ik voeg een screenshot van het ECG toe als ik dat kan.)`;
+}
+function openClaude(attempt) {
+  const text = claudeText(attempt);
+  try { navigator.clipboard && navigator.clipboard.writeText(text).catch(() => {}); } catch {}
+  const url = "https://claude.ai/new?q=" + encodeURIComponent(text.length > 6000 ? text.slice(0, 6000) : text);
+  window.open(url, "_blank", "noopener");
+}
+
+const li = arr => (arr && arr.length) ? `<ul class="fb-list">${arr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p class="muted" style="margin:0">Niets te melden.</p>`;
+
+function renderFeedback(fb, attempt) {
+  const c = caseById(attempt.caseId) || state.current, ref = refOf(c, attempt), fig = attempt.courseFigure || c.course_figure;
+  const r = fb.reasoning || {}, ri = fb.reference_interpretation || {}, ed = fb.education || {};
+  const rows = [["Frequentie", ri.heart_rate], ["Ritme", ri.rhythm], ["As", ri.axis], ["PR-interval", ri.pr_interval], ["QRS", ri.qrs], ["QT / QTc", ri.qt_qtc], ["P-toppen", ri.p_waves], ["ST-segment", ri.st_segment], ["T-toppen", ri.t_waves], ["Andere", ri.other]].filter(x => x[1]);
+  const v = attempt.verdict;
+  $("#feedback").innerHTML = `
+  <div class="card">
+    <div class="eyebrow">Feedback</div>
+    <div class="verdict ${v}"><span class="tag">${VLABEL[v]}</span><div><b>Jouw diagnose:</b> ${esc(attempt.finalDiagnosis)}<br>${esc(fb.verdict_explanation)}</div></div>
+    <div class="row">${statusPill(c)}<span class="muted" style="font-size:.85rem">Referentie: <b>${esc(ref.diagnosis || "geen gevalideerde referentie")}</b></span></div>
+    ${fb.uncertainty ? `<div class="notice"><b>Onzekerheid:</b> ${esc(fb.uncertainty)}</div>` : ""}
+    ${fb.course_conflicts ? `<div class="notice info"><b>Cursus versus andere bronnen:</b> ${esc(fb.course_conflicts)}</div>` : ""}
+
+    <h3>A. Je redenering</h3>
+    <div class="fb-grid">
+      <div class="fb-box"><h3><span class="dot" style="background:var(--good)"></span>Juiste observaties</h3>${li(r.correct_observations)}</div>
+      <div class="fb-box"><h3><span class="dot" style="background:var(--bad)"></span>Foute observaties</h3>${li(r.incorrect_observations)}</div>
+      <div class="fb-box"><h3><span class="dot" style="background:var(--warn)"></span>Gemiste bevindingen</h3>${li(r.missed_findings)}</div>
+      <div class="fb-box"><h3><span class="dot" style="background:var(--bad)"></span>Foute interpretaties</h3>${li(r.incorrect_interpretations)}</div>
+    </div>
+    <p style="margin:0"><b>Kwaliteit van de redenering${r.systematic_score ? ` (${esc(r.systematic_score)}/5)` : ""}:</b> ${esc(r.quality)}</p>
+
+    <details class="sec" open><summary>B–C. Referentie-interpretatie</summary><div>
+      <div style="overflow-x:auto"><table class="tbl"><tbody>${rows.map(([k, x]) => `<tr><th>${k}</th><td>${esc(x)}</td></tr>`).join("")}</tbody></table></div>
+      ${(ref.known_facts || []).length ? `<div class="muted" style="font-size:.88rem"><b>Gevalideerde feiten uit de bron:</b>${li(ref.known_facts)}</div>` : ""}${ref.notes ? `<div class="muted" style="font-size:.88rem"><b>Uit je eigen oplossing:</b> ${esc(ref.notes)}</div>` : ""}
+    </div></details>
+    <details class="sec" open><summary>D. Finale diagnose</summary><div><p style="margin:0">${esc(fb.final_diagnosis)}</p></div></details>
+    ${(fb.differential || []).length ? `<details class="sec"><summary>E. Differentiaaldiagnose</summary><div>${fb.differential.map(d => `<div><b>${esc(d.diagnosis)}</b><br><span class="muted">Waarom overwegen:</span> ${esc(d.why_considered)}<br><span class="muted">Waarom minder waarschijnlijk:</span> ${esc(d.why_less_likely)}</div>`).join("")}</div></details>` : ""}
+    <details class="sec"><summary>F. Uitleg</summary><div>
+      ${ed.pathophysiology ? `<p style="margin:0"><b>Pathofysiologie:</b> ${esc(ed.pathophysiology)}</p>` : ""}
+      ${ed.criteria ? `<p style="margin:0"><b>Diagnostische criteria:</b> ${esc(ed.criteria)}</p>` : ""}
+      ${ed.clinical_significance ? `<p style="margin:0"><b>Klinisch belang:</b> ${esc(ed.clinical_significance)}</p>` : ""}
+      ${ed.pitfalls ? `<p style="margin:0"><b>Valkuilen:</b> ${esc(ed.pitfalls)}</p>` : ""}
+    </div></details>
+    <details class="sec" open><summary>G. Cursusreferenties</summary><div>
+      ${(fb.course_refs || []).map(x => `<div class="ref-course"><div class="eyebrow">Uit je cursus · ${esc(x.section)}</div>“${esc(x.quote)}”</div>`).join("") || `<p class="muted" style="margin:0">Geen passende passage gevonden in H2 of H11.</p>`}
+      ${fig ? `<figure class="fig" style="margin:0"><img src="${esc(fig.image)}" alt="${esc(fig.caption)}"><figcaption>${esc(fig.caption)}</figcaption></figure>` : ""}
+      ${fb.extra_knowledge ? `<div class="ref-extra"><div class="eyebrow">Aanvullende kennis, niet uit je cursus</div>${esc(fb.extra_knowledge)}</div>` : ""}
+    </div></details>
+    <details class="sec"><summary>Bron van deze case</summary><div class="muted" style="font-size:.88rem">
+      <div>${esc(c.source.name)}${c.source.record ? " · " + esc(c.source.record) : ""}</div>
+      ${c.source.license ? `<div>${esc(c.source.license)}</div>` : ""}
+      ${c.source.url ? `<div><a href="${esc(c.source.url)}" target="_blank" rel="noopener">${esc(c.source.url)}</a></div>` : ""}
+      ${ref.status_note ? `<div>${esc(ref.status_note)}</div>` : ""}${attempt.model ? `<div>Feedback gemaakt door ${esc(attempt.model)} (Google Gemini, gratis versie).</div>` : ""}
+    </div></details>
+  </div>
+  <div class="card" style="gap:8px">
+    <button class="btn" id="claudeBtn">Twijfel? Controleer met Claude</button>
+    <p class="muted" style="margin:0;font-size:.85rem">Opent Claude met de case, je antwoord en deze feedback al ingevuld (de tekst staat ook op je klembord). Voeg daar eventueel een screenshot van het ECG toe. Dit gebruikt je gewone Claude-abonnement.</p>
+  </div>
+  <button class="btn primary big" id="nextBtn">Volgende ECG →</button>`;
+  $("#nextBtn").onclick = () => nextCase();
+  $("#claudeBtn").onclick = () => openClaude(attempt);
+}
+
+/* ---------- Aandachtspunten: rebuilt from all mistakes after every attempt ---------- */
+let insightsBusy = false;
+async function refreshInsights() {
+  if (insightsBusy) return;
+  const graded = state.attempts.filter(a => a.verdict);
+  if (!graded.length) return;
+  insightsBusy = true; renderInsights();
+  const recent = graded.slice(-40).map(a => ({
+    datum: a.at.slice(0, 10), onderwerp: a.topic, oordeel: a.verdict,
+    referentie: (a.reference && a.reference.diagnosis) || "?", eigen_diagnose: a.finalDiagnosis,
+    fouten: a.mistakes || [], gemist: (a.feedback && a.feedback.reasoning && a.feedback.reasoning.missed_findings) || []
+  }));
+  try {
+    const prev = state.insights ? { recurring: state.insights.recurring, improved: state.insights.improved } : null;
+    const data = await getInsights(prev, recent, graded.length);
+    const ins = data.insights || {};
+    ins.updatedAt = new Date().toISOString();
+    ins.basedOn = graded.length;
+    await store.saveInsights(ins);
+  } catch (e) { console.warn("insights", e); }
+  insightsBusy = false; renderInsights();
+}
+
+function renderInsights() {
+  const el = $("#insights"), ins = state.insights;
+  const n = state.attempts.filter(a => a.verdict).length;
+  const head = `<div class="card"><div><div class="eyebrow">Aandachtspunten</div><h2>Wat je nu best oefent</h2></div>
+    <p class="muted" style="margin:0">Deze lijst bouwt zichzelf op uit de fouten in je pogingen en wordt na elke ingediende case opnieuw berekend. Punten die je niet meer fout doet, schuiven door naar <b>verbeterd</b>.</p>
+    <div class="row">${ins ? `<span class="chip">Bijgewerkt ${esc(new Date(ins.updatedAt).toLocaleString("nl-BE", { dateStyle: "medium", timeStyle: "short" }))}</span><span class="chip">Op basis van ${esc(ins.basedOn)} pogingen</span>` : ""}
+    ${insightsBusy ? `<span class="chip"><svg class="pulse" style="width:40px;height:14px" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg>Wordt bijgewerkt</span>` : ""}
+    ${n && !insightsBusy ? `<button class="btn" id="insRefresh">Nu opnieuw berekenen</button>` : ""}</div></div>`;
+  if (!ins) {
+    el.innerHTML = head + `<div class="card empty"><h3>Nog geen aandachtspunten</h3><p>Maak een paar ECG's. Na je eerste ingediende case verschijnen hier je terugkerende fouten, zwakke onderwerpen en wat al beter gaat.</p><a class="btn primary" href="#oefenen">Start met oefenen</a></div>`;
+  } else {
+    el.innerHTML = head + `
+    <div class="card"><h3>Samenvatting</h3><p style="margin:0">${esc(ins.summary)}</p>${ins.next_focus ? `<div class="notice info"><b>Focus voor je volgende ECG:</b> ${esc(ins.next_focus)}</div>` : ""}</div>
+    <div class="card"><h3>Terugkerende fouten</h3>
+      ${(ins.recurring || []).map(p => `<div class="ap-item sev-${esc(p.severity)}"><div class="row" style="justify-content:space-between"><b>${esc(p.title)}</b><span class="count">${esc(p.count)}× · ernst ${esc(p.severity)}</span></div><div>${esc(p.explanation)}</div><div><b>Tip:</b> ${esc(p.tip)}</div>${p.course ? `<div class="muted" style="font-size:.85rem">Cursus: ${esc(p.course)}</div>` : ""}</div>`).join("") || `<p class="muted" style="margin:0">Geen terugkerende fouten. Goed bezig.</p>`}
+    </div>
+    ${(ins.weak_topics || []).length ? `<div class="card"><h3>Zwakke onderwerpen</h3>${ins.weak_topics.map(t => `<div class="list-item"><div><b>${esc(t.topic)}</b><div class="muted">${esc(t.why)}</div></div></div>`).join("")}</div>` : ""}
+    <div class="card"><h3>Verbeterd</h3>${(ins.improved || []).map(p => `<div class="ap-item better"><b>${esc(p.title)}</b><div class="muted">${esc(p.evidence)}</div></div>`).join("") || `<p class="muted" style="margin:0">Nog niets. Zodra een fout niet meer terugkomt, verschijnt ze hier.</p>`}</div>`;
+  }
+  const b = $("#insRefresh"); if (b) b.onclick = refreshInsights;
+}
+
+/* ---------- Voortgang ---------- */
+function backupCard() {
+  return `<div class="card"><h3>Back-up</h3><p class="muted" style="margin:0;font-size:.85rem">Je voortgang staat op dit toestel. Maak af en toe een back-up, of gebruik die om je gegevens naar een ander toestel over te zetten.</p>
+  <div class="row"><button class="btn" id="bkExport">Back-up downloaden</button><label class="btn" for="bkImport" style="display:inline-flex;align-items:center">Back-up terugzetten</label><input type="file" id="bkImport" accept="application/json,.json" hidden></div><div id="bkMsg" class="muted" style="font-size:.85rem"></div></div>`;
+}
+function wireBackup() {
+  const ex = $("#bkExport"), im = $("#bkImport"), msg = $("#bkMsg");
+  if (!ex) return;
+  ex.onclick = async () => {
+    const cases = [];
+    for (const c of state.custom) {
+      const { _url, ...x } = c;
+      try { const b = await IDB.get(c.id); if (b) x.imageData = (await blobToBase64(b)); } catch {}
+      cases.push(x);
+    }
+    const blob = new Blob([JSON.stringify({ app: "ecg-case-trainer", version: 1, exportedAt: new Date().toISOString(), attempts: state.attempts, insights: state.insights, cases }, null, 1)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "ecg-trainer-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    msg.textContent = "Back-up gemaakt.";
+  };
+  im.onchange = async () => {
+    const f = im.files[0]; if (!f) return;
+    try {
+      const d = JSON.parse(await f.text());
+      if (d.app !== "ecg-case-trainer") throw new Error("geen back-up");
+      const seen = new Set(state.attempts.map(a => a.id));
+      (d.attempts || []).forEach(a => { if (!seen.has(a.id)) state.attempts.push(a); });
+      state.attempts.sort((x, y) => x.at.localeCompare(y.at));
+      LS.set("attempts", state.attempts);
+      if (d.insights && (!state.insights || d.insights.updatedAt > state.insights.updatedAt)) await store.saveInsights(d.insights);
+      for (const c of d.cases || []) {
+        if (state.custom.some(x => x.id === c.id) || !c.imageData) continue;
+        const { imageData, ...x } = c;
+        const bin = Uint8Array.from(atob(imageData.data), ch => ch.charCodeAt(0));
+        await store.addCase(x, new Blob([bin], { type: imageData.mimeType }));
+      }
+      msg.textContent = "Back-up teruggezet.";
+      fillTopicFilter(); renderDashboard();
+    } catch (e) { console.warn(e); msg.textContent = "Dit bestand kon niet gelezen worden."; }
+  };
+}
+function renderDashboard() {
+  const el = $("#dashboard"), A = state.attempts.filter(a => a.verdict);
+  const cnt = v => A.filter(a => a.verdict === v).length;
+  if (!A.length) {
+    el.innerHTML = `<div class="card"><div><div class="eyebrow">Voortgang</div><h2>Je dashboard</h2></div></div><div class="card empty"><h3>Nog geen pogingen</h3><p>Je voortgang per onderwerp en doorheen de tijd verschijnt hier vanaf je eerste case.</p><a class="btn primary" href="#oefenen">Start met oefenen</a></div>` + backupCard();
+    wireBackup();
+    return;
+  }
+  const byTopic = {};
+  A.forEach(a => { const t = byTopic[a.topic] ||= { correct: 0, gedeeltelijk: 0, fout: 0 }; t[a.verdict]++; });
+  const topicRows = Object.entries(byTopic).sort((x, y) => (y[1].fout / sum(y[1])) - (x[1].fout / sum(x[1]))).map(([t, s]) => {
+    const n = sum(s);
+    return `<div class="topic-row"><div>${esc(t)}</div><div class="bar" role="img" aria-label="${s.correct} correct, ${s.gedeeltelijk} gedeeltelijk, ${s.fout} fout"><i style="width:${s.correct / n * 100}%;background:var(--good)"></i><i style="width:${s.gedeeltelijk / n * 100}%;background:var(--warn)"></i><i style="width:${s.fout / n * 100}%;background:var(--bad)"></i></div><div class="mono">${Math.round(s.correct / n * 100)}% · ${n}</div></div>`;
+  }).join("");
+  // per day
+  const days = {};
+  A.forEach(a => { const d = a.at.slice(0, 10); const x = days[d] ||= { n: 0, score: 0 }; x.n++; x.score += a.verdict === "correct" ? 1 : a.verdict === "gedeeltelijk" ? 0.5 : 0; });
+  const dk = Object.keys(days).sort().slice(-21);
+  const W = Math.max(320, dk.length * 44), H = 160, pl = 34, pb = 26, pt = 10;
+  const x = i => pl + (dk.length === 1 ? (W - pl) / 2 : i * (W - pl - 16) / (dk.length - 1));
+  const y = v => pt + (1 - v) * (H - pt - pb);
+  const pts = dk.map((d, i) => [x(i), y(days[d].score / days[d].n)]);
+  const chart = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Score per dag">
+    ${[0, .5, 1].map(v => `<line x1="${pl}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${pl - 6}" y="${y(v) + 4}" text-anchor="end" font-size="10" fill="var(--muted)" font-family="var(--f-mono)">${v * 100}%</text>`).join("")}
+    <polyline points="${pts.map(p => p.join(",")).join(" ")}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+    ${pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === pts.length - 1 ? 5 : 3.5}" fill="var(--accent)"><title>${dk[i]}: ${days[dk[i]].n} cases</title></circle><text x="${p[0]}" y="${H - 8}" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="var(--f-mono)">${dk[i].slice(5).split("-").reverse().join("/")}</text>`).join("")}
+  </svg>`;
+  const wrongCases = [...new Set(A.map(a => a.caseId))].map(id => ({ id, last: lastAttemptFor(id) })).filter(x => x.last && x.last.verdict !== "correct");
+  el.innerHTML = `
+  <div class="card"><div><div class="eyebrow">Voortgang</div><h2>Je dashboard</h2></div></div>
+  <div class="stats">
+    <div class="stat"><b>${A.length}</b><span>cases gemaakt</span></div>
+    <div class="stat"><b style="color:var(--good)">${cnt("correct")}</b><span>correct</span></div>
+    <div class="stat"><b style="color:var(--warn)">${cnt("gedeeltelijk")}</b><span>gedeeltelijk</span></div>
+    <div class="stat"><b style="color:var(--bad)">${cnt("fout")}</b><span>fout</span></div>
+  </div>
+  <div class="card"><h3>Per onderwerp</h3><p class="muted" style="margin:0;font-size:.85rem">Zwakste onderwerpen bovenaan. Groen correct, oranje gedeeltelijk, rood fout.</p>${topicRows}</div>
+  <div class="card"><h3>Doorheen de tijd</h3><p class="muted" style="margin:0;font-size:.85rem">Gemiddelde score per dag (correct = 100%, gedeeltelijk = 50%).</p><div class="chart-wrap">${chart}</div></div>
+  <div class="card"><h3>Nog niet correct</h3>${wrongCases.map(w => { const c = caseById(w.id); return c ? `<div class="list-item"><div class="row" style="flex-wrap:nowrap"><img class="thumb" src="${esc(imgSrc(c))}" alt=""><div><b>${esc(c.topic)}</b><div class="muted" style="font-size:.85rem">Laatst: ${esc(w.last.finalDiagnosis)}</div></div></div><div class="row"><span class="pill ${w.last.verdict}">${VLABEL[w.last.verdict]}</span><button class="btn" data-retry="${esc(c.id)}">Opnieuw</button></div></div>` : ""; }).join("") || `<p class="muted" style="margin:0">Alles wat je maakte, is intussen correct.</p>`}</div>
+  <div class="card"><h3>Geschiedenis</h3>${[...A].reverse().slice(0, 30).map(a => { const c = caseById(a.caseId); return `<details class="sec"><summary><span class="pill ${a.verdict}">${VLABEL[a.verdict]}</span> ${esc(a.topic)} <span class="muted mono">${esc(new Date(a.at).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" }))}</span></summary><div><div><b>Jouw diagnose:</b> ${esc(a.finalDiagnosis)}</div><div><b>Referentie:</b> ${esc((a.reference && a.reference.diagnosis) || "te verifiëren")}</div><div class="muted">${esc(a.feedback ? a.feedback.verdict_explanation : "")}</div><div style="white-space:pre-wrap;font-size:.9rem;border-left:3px solid var(--line);padding-left:10px">${esc(a.reasoning)}</div></div></details>`; }).join("")}</div>` + backupCard();
+  wireBackup();
+  el.querySelectorAll("[data-retry]").forEach(b => b.onclick = () => { location.hash = "oefenen"; nextCase(b.dataset.retry); });
+}
+const sum = s => s.correct + s.gedeeltelijk + s.fout;
+
+/* ---------- Cases ---------- */
+function renderCases() {
+  const el = $("#caseList");
+  el.innerHTML = allCases().map(c => {
+    const l = lastAttemptFor(c.id);
+    return `<div class="list-item"><div class="row" style="flex-wrap:nowrap"><img class="thumb" src="${esc(imgSrc(c))}" alt=""><div><b>${esc(c.topic)}</b> <span class="muted">· ${esc(c.difficulty)}</span><div class="muted" style="font-size:.85rem">${esc(c.source.name)}${c.source.record ? " · " + esc(c.source.record) : ""}</div></div></div>
+    <div class="row">${statusPill(c)}${l ? `<span class="pill ${l.verdict || ""}">${esc(VLABEL[l.verdict] || "")}</span>` : ""}<button class="btn" data-practice="${esc(c.id)}">Oefen</button>${c.source.kind !== "database" ? `<button class="btn" data-del="${esc(c.id)}" aria-label="Case verwijderen">Verwijder</button>` : ""}</div></div>`;
+  }).join("") + `<p class="muted" style="font-size:.85rem;margin:8px 0 0">De referentiediagnose van de database-cases staat op de server en verschijnt pas na het indienen. Je eigen cases worden op dit toestel bewaard.</p>`;
+  el.querySelectorAll("[data-practice]").forEach(b => b.onclick = () => { location.hash = "oefenen"; nextCase(b.dataset.practice); });
+  el.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+    if (b.dataset.armed) { await store.removeCase(b.dataset.del); renderCases(); fillTopicFilter(); }
+    else { b.dataset.armed = "1"; b.textContent = "Zeker?"; setTimeout(() => { if (b.isConnected) { delete b.dataset.armed; b.textContent = "Verwijder"; } }, 3000); }
+  });
+}
+
+function fillTopicFilter() {
+  const sel = $("#fTopic"), cur = sel.value, present = new Set(allCases().map(c => c.topic));
+  sel.innerHTML = `<option value="all">Alle onderwerpen</option>` + TOPICS.filter(t => present.has(t)).map(t => `<option>${esc(t)}</option>`).join("");
+  if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
+}
+
+async function downscale(file) {
+  const bmp = await createImageBitmap(file);
+  const max = 2400, s = Math.min(1, max / Math.max(bmp.width, bmp.height));
+  const cv = document.createElement("canvas"); cv.width = Math.round(bmp.width * s); cv.height = Math.round(bmp.height * s);
+  cv.getContext("2d").drawImage(bmp, 0, 0, cv.width, cv.height);
+  return await new Promise(r => cv.toBlob(r, "image/jpeg", 0.88));
+}
+
+function setupKeyForm() {
+  const k = $("#kKey"), m = $("#kModel"), msg = $("#keyMsg");
+  const show = () => { msg.textContent = settings.getKey() ? "Sleutel opgeslagen op dit toestel." : "Nog geen sleutel ingevuld."; };
+  k.value = settings.getKey(); m.value = settings.getModel(); show();
+  $("#keyForm").addEventListener("submit", e => { e.preventDefault(); settings.setKey(k.value); settings.setModel(m.value); show(); renderPractice(); });
+  $("#kClear").onclick = () => { settings.setKey(""); k.value = ""; show(); };
+}
+function setupCaseForm() {
+  $("#cTopic").innerHTML = TOPICS.map(t => `<option>${esc(t)}</option>`).join("");
+  $("#caseForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = $("#cImg").files[0], msg = $("#caseMsg"), btn = $("#cSave");
+    if (!f) return;
+    btn.disabled = true; msg.textContent = "Afbeelding verwerken…";
+    try {
+      const blob = await downscale(f);
+      const c = {
+        id: "eigen-" + Date.now().toString(36), topic: $("#cTopic").value, difficulty: $("#cDiff").value,
+        patient: $("#cPatient").value.trim(), context: $("#cContext").value.trim(), leads: "Eigen afbeelding",
+        source: { kind: "eigen", name: $("#cSrc").value.trim() || "Eigen oefening" },
+        reference: { diagnosis: $("#cDx").value.trim(), notes: $("#cNotes").value.trim(), status: $("#cDx").value.trim() ? "eigen-oplossing" : "te-verifieren", known_facts: [] },
+        createdAt: new Date().toISOString()
+      };
+      await store.addCase(c, blob);
+      e.target.reset();
+      msg.textContent = "Case opgeslagen. Ze zit nu in de oefenpool.";
+      renderCases(); fillTopicFilter();
+    } catch (err) {
+      console.warn(err);
+      msg.textContent = "Opslaan lukte niet. Probeer een andere afbeelding.";
+    } finally { btn.disabled = false; }
+  });
+}
+
+/* ---------- routing ---------- */
+const VIEWS = ["oefenen", "aandachtspunten", "voortgang", "cases"];
+function route() {
+  const v = VIEWS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "oefenen";
+  document.querySelectorAll("[data-viewsec]").forEach(s => s.hidden = s.id !== "view-" + v);
+  document.querySelectorAll("nav.tabs a").forEach(a => { if (a.dataset.view === v) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  if (v === "aandachtspunten") renderInsights();
+  if (v === "voortgang") renderDashboard();
+  if (v === "cases") renderCases();
+}
+
+async function start() {
+  ["fSource", "fTopic", "fDiff", "fWrong"].forEach(id => $("#" + id).addEventListener("change", () => { if (!state.feedback || confirmLeave()) nextCase(); }));
+  window.addEventListener("hashchange", route);
+  setupCaseForm();
+  setupKeyForm();
+  try {
+    state.builtin = await fetch("cases.json").then(r => r.json());
+  } catch (e) { console.warn(e); }
+  await loadData();
+  fillTopicFilter();
+  nextCase();
+  route();
+}
+function confirmLeave() { return true; }
+start();
+})();
+</script>
+</body>
+</html>
