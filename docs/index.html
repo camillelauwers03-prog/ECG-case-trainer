@@ -216,7 +216,7 @@ footer.foot{font-size:.78rem;color:var(--muted)}
         <div><div class="eyebrow">Instellingen</div><h2>Gratis Gemini-sleutel</h2></div>
         <p class="muted" style="margin:0">Maak een sleutel aan op <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> en plak hem hier. Hij wordt alleen op dit toestel bewaard en enkel naar Google gestuurd.</p>
         <form id="keyForm" class="wrap" style="padding:0;gap:8px">
-          <div><label class="lbl" for="kKey">API-sleutel</label><input type="password" id="kKey" autocomplete="off" placeholder="Begint meestal met AIza…" style="font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%"></div>
+          <div><label class="lbl" for="kKey">API-sleutel</label><input type="password" id="kKey" autocomplete="off" placeholder="Begint met AQ. of AIza" style="font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%"></div>
           <details><summary class="muted" style="cursor:pointer">Geavanceerd</summary><div style="padding-top:8px"><label class="lbl" for="kModel">Model (leeg = automatisch)</label><input type="text" id="kModel" placeholder="bv. gemini-3.5-flash"></div></details>
           <div class="row"><button class="btn primary" type="submit">Opslaan</button><button class="btn" type="button" id="kClear">Wissen</button></div>
           <div id="keyMsg" class="muted"></div>
@@ -247,7 +247,7 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot"><span class="mono">Versie 2026-11-20.5</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.6</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
@@ -824,7 +824,7 @@ async function downscale(file) {
 
 function setupKeyForm() {
   const k = $("#kKey"), m = $("#kModel"), msg = $("#keyMsg");
-  const show = () => { const k0 = settings.getKey(); msg.textContent = !k0 ? "Nog geen sleutel ingevuld." : /^AIza/.test(k0) ? "Sleutel opgeslagen op dit toestel." : "Opgeslagen, maar let op: een sleutel uit Google AI Studio begint normaal met AIza. Deze lijkt een ander soort code."; };
+  const show = () => { const k0 = settings.getKey(); msg.textContent = !k0 ? "Nog geen sleutel ingevuld." : "Sleutel opgeslagen op dit toestel." + (/\s/.test(k0) ? " Let op: er staat een spatie of witregel in." : ""); };
   k.value = settings.getKey(); m.value = settings.getModel(); show();
   $("#keyForm").addEventListener("submit", e => { e.preventDefault(); settings.setKey(k.value); settings.setModel(m.value); show(); renderPractice(); });
   $("#kClear").onclick = () => { settings.setKey(""); k.value = ""; show(); };

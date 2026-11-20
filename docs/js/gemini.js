@@ -83,8 +83,7 @@ export async function generateJson({ prompt, image }) {
 }
 
 function keyHint(key) {
-  return /^AIza/.test(key) ? "Kijk na of je de volledige sleutel hebt geplakt."
-    : "Een sleutel uit Google AI Studio begint normaal met AIza. Maak er een aan via aistudio.google.com > Get API key > Create API key en plak die bij Cases > Instellingen.";
+  return "Kijk na of je de volledige sleutel uit aistudio.google.com/apikey hebt geplakt (die begint met AQ. of AIza).";
 }
 
 function parseJson(text) {
