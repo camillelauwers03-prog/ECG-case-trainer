@@ -5,9 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ECG Case Trainer</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ECG Trainer">
-<meta name="theme-color" content="#c8442f">
+<meta name="theme-color" content="#f6f7f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f141a" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -139,10 +142,21 @@ details.sec > div{padding-top:8px;display:flex;flex-direction:column;gap:8px}
 .fig{background:var(--paper);border-radius:6px;padding:6px;max-width:520px}
 .fig img{display:block;width:100%}
 .fig figcaption{color:#5b3a32;font-size:.82rem;padding-top:4px}
+#splash{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;transition:opacity .35s ease}
+#splash.gone{opacity:0;pointer-events:none}
+#splash h1{font-size:1.4rem}
+#splash .pulse{width:120px;height:36px}
+@media (display-mode: standalone){ body{overscroll-behavior-y:none} header.top .chip{display:none} }
+html{-webkit-tap-highlight-color:transparent}
 footer.foot{font-size:.78rem;color:var(--muted)}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true">
+  <svg width="72" height="72" viewBox="0 0 34 34"><rect width="34" height="34" rx="8" fill="var(--accent)"/><path d="M4 18h6l2-6 3 12 3-15 2 9h10" fill="none" stroke="var(--accent-ink)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <h1>ECG Case Trainer</h1>
+  <svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg>
+</div>
 <div id="app">
 <nav class="tabs" aria-label="Hoofdmenu">
   <a href="#oefenen" data-view="oefenen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l2-5 3 10 3-12 2 7h6"/></svg>Oefenen</a>
@@ -763,9 +777,13 @@ async function start() {
   fillTopicFilter();
   nextCase();
   route();
+  const sp = $("#splash"); if (sp) { setTimeout(() => { sp.classList.add("gone"); setTimeout(() => sp.remove(), 400); }, 350); }
 }
 function confirmLeave() { return true; }
 start();
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(e => console.warn("sw", e)));
+}
 })();
 </script>
 </body>
