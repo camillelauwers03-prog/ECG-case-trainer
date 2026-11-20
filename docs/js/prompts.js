@@ -1,4 +1,4 @@
-import course from "./course.js?v=8";
+import course from "./course.js?v=9";
 
 export function feedbackPrompt(c, reasoning, dx) {
   const ref = c.reference;
@@ -96,4 +96,27 @@ ${JSON.stringify(attempts)}
 
 Antwoord met ENKEL JSON:
 {"summary":"2-3 zinnen over waar ze nu staat","recurring":[{"title":"korte titel","severity":"hoog"|"midden"|"laag","count":aantal pogingen met deze fout,"explanation":"wat er telkens misgaat","tip":"concrete tip","course":"sectie of lege string"}],"weak_topics":[{"topic":"...","why":"..."}],"improved":[{"title":"...","evidence":"waaruit blijkt dat het beter gaat"}],"next_focus":"één zin: waar het volgende ECG op te letten"}`;
+}
+
+// Short first take: only the diagnosis versus the reference, no image, so Gemini answers in a few seconds.
+export function quickPrompt(c, reasoning, dx) {
+  const ref = c.reference;
+  return `Je bent een cardioloog-docent. Een geneeskundestudent oefent ECG's lezen. Geef een SNELLE eerste beoordeling in het Nederlands, kort en concreet. Een uitgebreide analyse volgt apart, dus hou het kort.
+
+Beoordeel de finale diagnose van de student tegenover de referentiediagnose. Synoniemen en afkortingen tellen als juist (VKF = AF, VES = PVC, PAC = SVES, LBTB = LBBB, SR = sinusritme).
+- "correct": de kern van de referentie is benoemd.
+- "gedeeltelijk": deels juist (bv. juiste hoofddiagnose, verkeerde lokalisatie of belangrijk onderdeel ontbreekt).
+- "fout": kern fout of ontbreekt.
+Verzin geen ECG-bevindingen; steun alleen op de referentie en wat de student schrijft. ${ref.diagnosis ? "" : "Er is GEEN gevalideerde referentie: wees voorzichtig en zeg dat."}
+
+Referentiediagnose: ${ref.diagnosis || "GEEN"}
+Gekende feiten: ${(ref.known_facts || []).join(" | ") || "geen"}
+${ref.notes ? "Uitleg uit de oplossing: " + ref.notes : ""}
+Patiënt: ${c.patient || "niet vermeld"}. Context: ${c.context || "geen"}.
+
+Redenering van de student: """${reasoning}"""
+Finale diagnose van de student: """${dx}"""
+
+Antwoord ALLEEN met JSON:
+{"diagnosis_verdict":"correct|gedeeltelijk|fout","summary":"2 tot 3 zinnen: wat klopt en wat niet","key_tip":"1 zin: het belangrijkste leerpunt"}`;
 }

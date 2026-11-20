@@ -247,13 +247,13 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot"><span class="mono">Versie 2026-11-20.8</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.9</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
 <script type="module">
-import { getFeedback, getInsights } from "./js/ai.js?v=8";
-import { settings } from "./js/gemini.js?v=8";
+import { getFeedback, getInsights, getQuick } from "./js/ai.js?v=9";
+import { settings } from "./js/gemini.js?v=9";
 (() => {
 "use strict";
 const $ = (s, el = document) => el.querySelector(s);
@@ -547,11 +547,24 @@ async function submit() {
   const msg = $("#submitMsg"), btn = $("#submitBtn");
   const attempt = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), caseId: c.id, topic: c.topic, source: c.source.kind, at: new Date().toISOString(), reasoning, finalDiagnosis: dx, verdict: null, feedback: null };
   state.busy = true; btn.disabled = true;
-  msg.innerHTML = `<div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>Je antwoord wordt nagekeken. Dit duurt meestal 10 tot 40 seconden.</span></div>`;
+  msg.innerHTML = `<div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>Je antwoord wordt nagekeken. Een snelle eerste feedback komt binnen enkele seconden, de volledige analyse daarna.</span></div>`;
   try {
     let image = null;
     try { image = await blobToBase64(await imageBlob(c)); } catch (e) { console.warn("image", e); }
     const { _url, image: _img, ...caseData } = c;
+    // Fast first take (diagnosis only, no image) runs next to the full analysis.
+    let quickShown = false;
+    getQuick(caseData, reasoning, dx).then(q => {
+      if (!state.busy) return;
+      quickShown = true;
+      const qv = ["correct", "gedeeltelijk", "fout"].includes(q.quick.diagnosis_verdict) ? q.quick.diagnosis_verdict : "fout";
+      const ref = q.reference || {};
+      msg.innerHTML = `<div class="card" style="gap:10px"><div class="eyebrow">Snelle feedback</div>
+        <div class="verdict ${qv}"><span class="tag">${VLABEL[qv]}</span><div><b>Jouw diagnose:</b> ${esc(dx)}<br>${esc(q.quick.summary || "")}</div></div>
+        <div class="muted" style="font-size:.9rem">Referentie: <b>${esc(ref.diagnosis || "geen gevalideerde referentie")}</b></div>
+        ${q.quick.key_tip ? `<div><b>Leerpunt:</b> ${esc(q.quick.key_tip)}</div>` : ""}
+        <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>De volledige analyse van je redenering en het ECG volgt zo...</span></div></div>`;
+    }).catch(e => console.warn("quick", e));
     const data = await getFeedback(caseData, reasoning, dx, image);
     const fb = data.feedback || {};
     attempt.verdict = ["correct", "gedeeltelijk", "fout"].includes(fb.diagnosis_verdict) ? fb.diagnosis_verdict : "fout";
@@ -569,7 +582,7 @@ async function submit() {
   } catch (e) {
     console.warn(e);
     const why = (e && e.message) || "Er ging iets mis. Je tekst staat er nog; probeer opnieuw.";
-    msg.innerHTML = `<div class="notice">${esc(why)}${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>`;
+    msg.innerHTML = (quickShown ? msg.innerHTML.replace(/<div class="thinking">[\s\S]*?<\/div><\/div>$/, "</div>") : "") + `<div class="notice">${esc(why)}${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>`;
   } finally { state.busy = false; if (btn) btn.disabled = false; }
 }
 
@@ -884,7 +897,7 @@ async function start() {
 function confirmLeave() { return true; }
 start();
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=8", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=9", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
   let reloaded = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && !document.querySelector("#reasoning")?.value) { reloaded = true; location.reload(); } });
 }

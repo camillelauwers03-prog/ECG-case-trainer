@@ -33,13 +33,21 @@ function cleanKey(v) { return String(v).replace(/[^A-Za-z0-9._\-]/g, ""); }
 
 export class AiError extends Error { constructor(message, code) { super(message); this.code = code; } }
 
-export async function generateJson({ prompt, image }) {
+export async function generateJson({ prompt, image, fast }) {
   const key = settings.getKey();
   if (!key) throw new AiError("Vul eerst je gratis Gemini-sleutel in bij Cases > Instellingen.", "no_key");
   const parts = [];
   if (image && image.data) parts.push({ inline_data: { mime_type: image.mimeType || "image/png", data: image.data } });
   parts.push({ text: prompt });
-  const body = JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.2 } });
+  // fast: short answer with as little "thinking" as the model allows. Not every model accepts the
+  // thinking setting, so a 400 about it is retried without.
+  let useThinking = !!fast;
+  const bodyFor = model => {
+    const gc = { responseMimeType: "application/json", temperature: 0.2 };
+    if (fast) gc.maxOutputTokens = 1024;
+    if (useThinking) gc.thinkingConfig = /gemini-2\./.test(model) ? { thinkingBudget: 0 } : { thinkingLevel: "minimal" };
+    return JSON.stringify({ contents: [{ role: "user", parts }], generationConfig: gc });
+  };
   let found = ""; try { found = localStorage.getItem(FOUND_KEY) || ""; } catch {}
   let models = settings.getModel() ? [settings.getModel()] : [...new Set([found, ...DEFAULT_MODELS].filter(Boolean))];
   let last, discovered = false;
@@ -48,7 +56,7 @@ export async function generateJson({ prompt, image }) {
   const call = (model, viaQuery) => fetch(`${API}/${encodeURIComponent(model)}:generateContent` + (viaQuery ? `?key=${encodeURIComponent(key)}` : ""), {
     method: "POST",
     headers: viaQuery ? { "content-type": "text/plain;charset=UTF-8" } : { "content-type": "application/json", "x-goog-api-key": key },
-    body
+    body: bodyFor(model)
   });
   let viaQuery = false;
   for (let i = 0; i < models.length; i++) {
@@ -77,6 +85,7 @@ export async function generateJson({ prompt, image }) {
     }
     const errText = await res.text().catch(() => "");
     let gmsg = ""; try { gmsg = JSON.parse(errText).error.message; } catch { gmsg = errText.slice(0, 200); }
+    if (useThinking && res.status === 400 && /thinking/i.test(gmsg)) { useThinking = false; i--; continue; }
     lastDetail = `${model}: fout ${res.status}${gmsg ? " – " + gmsg : ""}`;
     console.warn("Gemini", lastDetail);
     if (res.status === 429) throw new AiError("De gratis limiet van Gemini is even bereikt. Wacht een minuut en probeer opnieuw. (" + lastDetail + ")", "rate_limited");
