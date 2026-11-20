@@ -250,13 +250,13 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot"><span class="mono">Versie 2026-11-20.13</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.14</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
 <script type="module">
-import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=13";
-import { settings } from "./js/gemini.js?v=13";
+import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=14";
+import { settings } from "./js/gemini.js?v=14";
 (() => {
 "use strict";
 const $ = (s, el = document) => el.querySelector(s);
@@ -286,7 +286,12 @@ const IDB = {
   async del(k) { const d = await this.open(); return new Promise(ok => { const t = d.transaction("images", "readwrite"); t.objectStore("images").delete(k); t.oncomplete = ok; t.onerror = ok; }); }
 };
 const store = {
-  async addAttempt(a) { state.attempts.push(a); LS.set("attempts", state.attempts); },
+  async saveAttempt(a) {
+    const i = state.attempts.findIndex(x => x.id === a.id);
+    if (i >= 0) state.attempts[i] = a; else state.attempts.push(a);
+    LS.set("attempts", state.attempts);
+  },
+  async addAttempt(a) { return this.saveAttempt(a); },
   async saveInsights(ins) { state.insights = ins; LS.set("insights", ins); },
   async addCase(c, blob) {
     await IDB.put(c.id, blob);
@@ -305,6 +310,12 @@ function setSync(text, ok) { const c = $("#syncChip"); c.textContent = text; c.s
 
 async function loadData() {
   state.attempts = LS.get("attempts", []);
+  { // One record per id; an analysis that was still running when the app closed is marked as interrupted.
+    const seen = new Set(); state.attempts = state.attempts.filter(a => a && a.id && !seen.has(a.id) && seen.add(a.id));
+    let changed = false;
+    state.attempts.forEach(a => { if (a.status === "bezig") { a.status = "onderbroken"; changed = true; } });
+    if (changed) LS.set("attempts", state.attempts);
+  }
   state.insights = LS.get("insights", null);
   state.custom = LS.get("cases", []);
   for (const c of state.custom) {
@@ -317,7 +328,7 @@ async function loadData() {
 /* ---------- cases ---------- */
 const allCases = () => [...state.builtin, ...state.custom];
 const caseById = id => allCases().find(c => c.id === id);
-const lastAttemptFor = id => [...state.attempts].reverse().find(a => a.caseId === id);
+const lastAttemptFor = id => [...state.attempts].reverse().find(a => a.caseId === id && a.verdict);
 
 function eligible() {
   const src = $("#fSource").value, topic = $("#fTopic").value, diff = $("#fDiff").value, wrong = $("#fWrong").checked;
@@ -562,65 +573,97 @@ async function blobToBase64(blob) {
   return { mimeType: blob.type || "image/png", data: String(url).split(",")[1] };
 }
 
+const VERDICTS = ["correct", "gedeeltelijk", "fout"];
+const analysing = new Set(); // attempt ids with a running analysis in this session
+
+// Full analysis for one saved attempt. The attempt is stored before this starts and updated after,
+// so closing the app or a failed call never makes an exercise disappear from the history.
+async function runAnalysis(attempt, c, { onQuick } = {}) {
+  analysing.add(attempt.id);
+  const { _url, image: _img, ...caseData } = c;
+  try {
+    getQuick(caseData, attempt.reasoning, attempt.finalDiagnosis).then(q => {
+      const qv = VERDICTS.includes(q.quick.diagnosis_verdict) ? q.quick.diagnosis_verdict : "fout";
+      attempt.quick = q.quick;
+      if (!attempt.feedback) { attempt.verdict = qv; attempt.verdictSource = "snel"; store.saveAttempt(attempt); }
+      onQuick && onQuick(q, qv);
+    }).catch(e => console.warn("quick", e));
+    let image = null;
+    try { image = await blobToBase64(await imageBlob(c)); } catch (e) { console.warn("image", e); }
+    const data = await getFeedback(caseData, attempt.reasoning, attempt.finalDiagnosis, image);
+    const fb = data.feedback || {};
+    attempt.verdict = VERDICTS.includes(fb.diagnosis_verdict) ? fb.diagnosis_verdict : "fout";
+    attempt.verdictSource = "volledig";
+    attempt.feedback = fb;
+    attempt.model = data.model;
+    attempt.reference = data.reference || attempt.reference || c.reference;
+    attempt.courseFigure = data.course_figure || null;
+    attempt.mistakes = (fb.mistake_tags || []).map(m => ({ category: String(m.category || "").slice(0, 60), detail: String(m.detail || "").slice(0, 400) }));
+    attempt.status = "klaar"; delete attempt.error;
+    await store.saveAttempt(attempt);
+    return attempt;
+  } catch (e) {
+    attempt.status = "mislukt"; attempt.error = String((e && e.message) || e).slice(0, 300);
+    await store.saveAttempt(attempt);
+    throw e;
+  } finally { analysing.delete(attempt.id); }
+}
+
+function readyToast(attempt, c) {
+  toast(`<div><b>Analyse klaar</b> · ${esc(c.topic)} · <span class="pill ${attempt.verdict}">${VLABEL[attempt.verdict]}</span></div><div class="row"><button class="btn primary" type="button" data-go>Bekijk</button><button class="btn" type="button" data-x>Later</button></div>`, () => openAttempt(attempt.id));
+}
+
+async function reanalyze(id) {
+  const a = state.attempts.find(x => x.id === id), c = a && caseById(a.caseId);
+  if (!a || !c || analysing.has(id)) return;
+  a.status = "bezig"; await store.saveAttempt(a);
+  if (location.hash === "#voortgang") route();
+  toast(`<div>Analyse gestart voor ${esc(c.topic)}. Je krijgt een melding als ze klaar is.</div><div class="row"><button class="btn" type="button" data-x>Oké</button></div>`);
+  try { await runAnalysis(a, c); refreshInsights(); readyToast(a, c); }
+  catch (e) { toast(`<div><b>Analyse mislukt</b> · ${esc(c.topic)}: ${esc((e && e.message) || "")}</div><div class="row"><button class="btn" type="button" data-x>Sluiten</button></div>`); }
+  if (location.hash === "#voortgang") route();
+}
+
 async function submit() {
   if (state.busy) return;
   const c = state.current, reasoning = $("#reasoning").value.trim(), dx = $("#finalDx").value.trim();
   if (!reasoning || !dx) return;
   const msg = $("#submitMsg"), btn = $("#submitBtn");
-  const attempt = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), caseId: c.id, topic: c.topic, source: c.source.kind, at: new Date().toISOString(), reasoning, finalDiagnosis: dx, verdict: null, feedback: null };
+  const instRef = (() => { try { const { _url, image: _i, ...cd } = c; return withRef(cd).reference || {}; } catch { return {}; } })();
+  const attempt = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), caseId: c.id, topic: c.topic, source: c.source.kind, at: new Date().toISOString(), reasoning, finalDiagnosis: dx, verdict: null, feedback: null, reference: instRef, status: "bezig" };
+  // Saved right away: one record per submit, updated in place when the analysis finishes.
+  await store.saveAttempt(attempt);
+  LS.set("draft:" + c.id, null);
   state.busy = true; state.pendingId = attempt.id; btn.disabled = true;
   const here = () => state.pendingId === attempt.id && state.current === c;
-  const skipHtml = `<button class="btn primary big skip" type="button" data-skip>Volgende ECG → <span style="font-weight:400;font-size:.85rem">(analyse loopt verder: je krijgt een melding, en je vindt ze bij Voortgang › Mijn analyses)</span></button>`;
+  const skipHtml = `<button class="btn primary big skip" type="button" data-skip>Volgende ECG → <span style="font-weight:400;font-size:.85rem">(je antwoord is bewaard; de analyse loopt verder en je vindt ze bij Voortgang › Mijn analyses)</span></button>`;
   msg.onclick = e => { if (e.target.closest("[data-skip]")) nextCase(); };
-  // Instant: the reference answer is known locally, so show it before any network call.
-  const instRef = (() => { try { const { _url, image: _i, ...cd } = c; return withRef(cd).reference || {}; } catch { return {}; } })();
-  const instHtml = `<div class="card" style="gap:10px"><div class="eyebrow">Meteen: de juiste diagnose</div>
+  msg.innerHTML = `<div class="card" style="gap:10px"><div class="eyebrow">Meteen: de juiste diagnose</div>
     <div><b>Jouw diagnose:</b> ${esc(dx)}</div>
     <div><b>Referentie:</b> ${esc(instRef.diagnosis || "geen gevalideerde referentie voor deze case")}</div>
     ${(instRef.known_facts || []).length ? `<details class="sec"><summary>Gekende feiten uit de bron</summary><div>${li(instRef.known_facts)}</div></details>` : ""}
     <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>Gemini beoordeelt je antwoord. Een korte beoordeling volgt binnen enkele seconden, de volledige analyse daarna.</span></div></div>${skipHtml}`;
-  msg.innerHTML = instHtml;
+  let quickShown = false;
   try {
-    const { _url, image: _img, ...caseData } = c;
-    // Fast first take (diagnosis only, no image) runs next to the full analysis.
-    let quickShown = false;
-    getQuick(caseData, reasoning, dx).then(q => {
-      if (!here()) return;
+    await runAnalysis(attempt, c, { onQuick: (q, qv) => {
+      if (!here() || attempt.feedback) return;
       quickShown = true;
-      const qv = ["correct", "gedeeltelijk", "fout"].includes(q.quick.diagnosis_verdict) ? q.quick.diagnosis_verdict : "fout";
-      const ref = q.reference || {};
       msg.innerHTML = `<div class="card" style="gap:10px"><div class="eyebrow">Snelle feedback</div>
         <div class="verdict ${qv}"><span class="tag">${VLABEL[qv]}</span><div><b>Jouw diagnose:</b> ${esc(dx)}<br>${esc(q.quick.summary || "")}</div></div>
-        <div class="muted" style="font-size:.9rem">Referentie: <b>${esc(ref.diagnosis || "geen gevalideerde referentie")}</b></div>
+        <div class="muted" style="font-size:.9rem">Referentie: <b>${esc((q.reference || {}).diagnosis || "geen gevalideerde referentie")}</b></div>
         ${q.quick.key_tip ? `<div><b>Leerpunt:</b> ${esc(q.quick.key_tip)}</div>` : ""}
         <div class="thinking"><svg class="pulse" viewBox="0 0 64 20"><path d="M0 10h14l4-7 6 14 5-12 3 5h32"/></svg><span>De volledige analyse van je redenering en het ECG volgt zo...</span></div></div>${skipHtml}`;
-    }).catch(e => console.warn("quick", e));
-    let image = null;
-    try { image = await blobToBase64(await imageBlob(c)); } catch (e) { console.warn("image", e); }
-    const data = await getFeedback(caseData, reasoning, dx, image);
-    const fb = data.feedback || {};
-    attempt.verdict = ["correct", "gedeeltelijk", "fout"].includes(fb.diagnosis_verdict) ? fb.diagnosis_verdict : "fout";
-    attempt.feedback = fb;
-    attempt.model = data.model;
-    attempt.reference = data.reference || c.reference;
-    attempt.courseFigure = data.course_figure || null;
-    attempt.mistakes = (fb.mistake_tags || []).map(m => ({ category: String(m.category || "").slice(0, 60), detail: String(m.detail || "").slice(0, 400) }));
-    await store.addAttempt(attempt);
-    LS.set("draft:" + c.id, null);
-    if (!here()) {
-      refreshInsights(); if (location.hash === "#voortgang" || location.hash === "#aandachtspunten") route();
-      toast(`<div><b>Analyse klaar</b> · ${esc(c.topic)} · <span class="pill ${attempt.verdict}">${VLABEL[attempt.verdict]}</span></div><div class="row"><button class="btn primary" type="button" data-go>Bekijk</button><button class="btn" type="button" data-x>Later</button></div>`, () => openAttempt(attempt.id));
-      return;
-    }
-    state.feedback = { fb, attempt };
+    } });
+    refreshInsights();
+    if (!here()) { if (location.hash === "#voortgang" || location.hash === "#aandachtspunten") route(); readyToast(attempt, c); return; }
+    state.feedback = { fb: attempt.feedback, attempt };
     renderPractice();
     $("#feedback").scrollIntoView({ behavior: "smooth", block: "start" });
-    refreshInsights();
   } catch (e) {
     console.warn(e);
-    if (!here()) { toast(`<div><b>Analyse mislukt</b> · ${esc(c.topic)}: ${esc((e && e.message) || "")}</div><div class="row"><button class="btn" type="button" data-x>Sluiten</button></div>`); return; }
-    const why = (e && e.message) || "Er ging iets mis. Je tekst staat er nog; probeer opnieuw.";
-    msg.innerHTML = (quickShown ? msg.innerHTML.replace(/<div class="thinking">[\s\S]*?<\/div><\/div>$/, "</div>") : "") + `<div class="notice">${esc(why)}${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>`;
+    if (!here()) { toast(`<div><b>Analyse mislukt</b> · ${esc(c.topic)}. Je antwoord is bewaard; start de analyse opnieuw bij Voortgang › Mijn analyses.</div><div class="row"><button class="btn" type="button" data-x>Sluiten</button></div>`); return; }
+    const why = (e && e.message) || "Er ging iets mis.";
+    msg.innerHTML = (quickShown ? msg.innerHTML.replace(/<div class="thinking">[\s\S]*?<\/div><\/div>(<button[\s\S]*)?$/, "</div>") : "") + `<div class="notice">${esc(why)} Je antwoord is bewaard. Je kan de analyse later opnieuw starten bij Voortgang › Mijn analyses.${e && (e.code === "no_key" || e.code === "bad_key") ? ` <a href="#cases">Naar instellingen</a>` : ""}</div>${skipHtml}`;
   } finally { if (state.pendingId === attempt.id) { state.busy = false; state.pendingId = null; if (btn) btn.disabled = false; } }
 }
 
@@ -717,7 +760,7 @@ function renderFeedback(fb, attempt) {
 let insightsBusy = false;
 async function refreshInsights() {
   if (insightsBusy) return;
-  const graded = state.attempts.filter(a => a.verdict);
+  const graded = state.attempts.filter(a => a.verdict && a.feedback);
   if (!graded.length) return;
   insightsBusy = true; renderInsights();
   const recent = graded.slice(-40).map(a => ({
@@ -800,9 +843,10 @@ function wireBackup() {
   };
 }
 function renderDashboard() {
-  const el = $("#dashboard"), A = state.attempts.filter(a => a.verdict);
+  const el = $("#dashboard"), A = state.attempts.filter(a => a.verdict), ALL = state.attempts;
   const cnt = v => A.filter(a => a.verdict === v).length;
-  if (!A.length) {
+  const open = ALL.filter(a => !a.feedback).length;
+  if (!ALL.length) {
     el.innerHTML = `<div class="card"><div><div class="eyebrow">Voortgang</div><h2>Je dashboard</h2></div></div><div class="card empty"><h3>Nog geen pogingen</h3><p>Je voortgang per onderwerp en doorheen de tijd verschijnt hier vanaf je eerste case.</p><a class="btn primary" href="#oefenen">Start met oefenen</a></div>` + backupCard();
     wireBackup();
     return;
@@ -830,17 +874,21 @@ function renderDashboard() {
   el.innerHTML = `
   <div class="card"><div><div class="eyebrow">Voortgang</div><h2>Je dashboard</h2></div></div>
   <div class="stats">
-    <div class="stat"><b>${A.length}</b><span>cases gemaakt</span></div>
+    <div class="stat"><b>${ALL.length}</b><span>ingediend${new Set(ALL.map(a => a.caseId)).size !== ALL.length ? ` (${new Set(ALL.map(a => a.caseId)).size} verschillende ECG's)` : ""}</span></div>
     <div class="stat"><b style="color:var(--good)">${cnt("correct")}</b><span>correct</span></div>
     <div class="stat"><b style="color:var(--warn)">${cnt("gedeeltelijk")}</b><span>gedeeltelijk</span></div>
     <div class="stat"><b style="color:var(--bad)">${cnt("fout")}</b><span>fout</span></div>
   </div>
   <div class="card"><h3>Per onderwerp</h3><p class="muted" style="margin:0;font-size:.85rem">Zwakste onderwerpen bovenaan. Groen correct, oranje gedeeltelijk, rood fout.</p>${topicRows}</div>
-  <div class="card"><h3>Doorheen de tijd</h3><p class="muted" style="margin:0;font-size:.85rem">Gemiddelde score per dag (correct = 100%, gedeeltelijk = 50%).</p><div class="chart-wrap">${chart}</div></div>
+  ${A.length ? "" : `<div class="card"><p class="muted" style="margin:0">Nog geen beoordeelde pogingen. Start de analyse bij Mijn analyses hieronder.</p></div>`}<div class="card" ${A.length ? "" : "hidden"}><h3>Doorheen de tijd</h3><p class="muted" style="margin:0;font-size:.85rem">Gemiddelde score per dag (correct = 100%, gedeeltelijk = 50%).</p><div class="chart-wrap">${chart}</div></div>
   <div class="card"><h3>Nog niet correct</h3>${wrongCases.map(w => { const c = caseById(w.id); return c ? `<div class="list-item"><div class="row" style="flex-wrap:nowrap"><img class="thumb" src="${esc(imgSrc(c))}" alt=""><div><b>${esc(c.topic)}</b><div class="muted" style="font-size:.85rem">Laatst: ${esc(w.last.finalDiagnosis)}</div></div></div><div class="row"><span class="pill ${w.last.verdict}">${VLABEL[w.last.verdict]}</span><button class="btn" data-retry="${esc(c.id)}">Opnieuw</button></div></div>` : ""; }).join("") || `<p class="muted" style="margin:0">Alles wat je maakte, is intussen correct.</p>`}</div>
-  <div class="card" id="geschiedenis"><h3>Mijn analyses</h3><p class="muted" style="margin:0;font-size:.85rem">Al je ingediende ECG's met de volledige feedback, nieuwste bovenaan.</p>${[...A].reverse().slice(0, 30).map(a => { const c = caseById(a.caseId); return `<details class="sec"><summary><span class="pill ${a.verdict}">${VLABEL[a.verdict]}</span> ${esc(a.topic)} <span class="muted mono">${esc(new Date(a.at).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" }))}</span></summary><div><div><b>Jouw diagnose:</b> ${esc(a.finalDiagnosis)}</div><div><b>Referentie:</b> ${esc((a.reference && a.reference.diagnosis) || "te verifiëren")}</div><div class="muted">${esc(a.feedback ? a.feedback.verdict_explanation : "")}</div><div style="white-space:pre-wrap;font-size:.9rem;border-left:3px solid var(--line);padding-left:10px">${esc(a.reasoning)}</div>${a.feedback ? `<button class="btn primary" type="button" data-open="${esc(a.id)}">Volledige analyse bekijken</button>` : ""}</div></details>`; }).join("")}</div>` + backupCard();
+  <div class="card" id="geschiedenis"><h3>Mijn analyses</h3><p class="muted" style="margin:0;font-size:.85rem">Al je ingediende ECG's, nieuwste bovenaan.${open ? ` ${open} zonder volledige analyse: open ze om de analyse (opnieuw) te starten.` : ""}</p>${[...ALL].reverse().slice(0, 60).map(a => {
+    const st = a.feedback ? "" : analysing.has(a.id) || a.status === "bezig" ? "analyse bezig" : a.status === "mislukt" ? "analyse mislukt" : "analyse niet afgerond";
+    const pill = a.verdict ? `<span class="pill ${a.verdict}">${VLABEL[a.verdict]}${a.feedback ? "" : " (snel)"}</span>` : `<span class="pill verif">${st}</span>`;
+    return `<details class="sec"><summary>${pill} ${esc(a.topic)} <span class="muted mono">${esc(new Date(a.at).toLocaleString("nl-BE", { dateStyle: "short", timeStyle: "short" }))}</span></summary><div><div><b>Jouw diagnose:</b> ${esc(a.finalDiagnosis)}</div><div><b>Referentie:</b> ${esc((a.reference && a.reference.diagnosis) || "te verifiëren")}</div>${a.feedback ? `<div class="muted">${esc(a.feedback.verdict_explanation || "")}</div>` : a.quick ? `<div class="muted">${esc(a.quick.summary || "")}</div>` : ""}${!a.feedback && a.error ? `<div class="notice">${esc(a.error)}</div>` : ""}<div style="white-space:pre-wrap;font-size:.9rem;border-left:3px solid var(--line);padding-left:10px">${esc(a.reasoning)}</div>${a.feedback ? `<button class="btn primary" type="button" data-open="${esc(a.id)}">Volledige analyse bekijken</button>` : analysing.has(a.id) ? `<span class="muted">Analyse loopt...</span>` : `<button class="btn primary" type="button" data-reanalyze="${esc(a.id)}">Analyse starten</button>`}</div></details>`; }).join("")}</div>` + backupCard();
   wireBackup();
   el.querySelectorAll("[data-open]").forEach(b => b.onclick = () => openAttempt(b.dataset.open));
+  el.querySelectorAll("[data-reanalyze]").forEach(b => b.onclick = () => reanalyze(b.dataset.reanalyze));
   el.querySelectorAll("[data-retry]").forEach(b => b.onclick = () => { location.hash = "oefenen"; nextCase(b.dataset.retry); });
 }
 const sum = s => s.correct + s.gedeeltelijk + s.fout;
@@ -936,7 +984,7 @@ async function start() {
 function confirmLeave() { return true; }
 start();
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=13", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=14", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
   let reloaded = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && !document.querySelector("#reasoning")?.value) { reloaded = true; location.reload(); } });
 }
