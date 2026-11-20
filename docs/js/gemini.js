@@ -21,11 +21,15 @@ async function discoverModels(key) {
 }
 
 export const settings = {
-  getKey() { try { return localStorage.getItem(KEY) || ""; } catch { return ""; } },
-  setKey(v) { try { v ? localStorage.setItem(KEY, v.trim()) : localStorage.removeItem(KEY); } catch {} },
+  getKey() { try { return cleanKey(localStorage.getItem(KEY) || ""); } catch { return ""; } },
+  setKey(v) { v = cleanKey(v || ""); try { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); } catch {} },
   getModel() { try { return localStorage.getItem(MODEL_KEY) || ""; } catch { return ""; } },
   setModel(v) { try { v ? localStorage.setItem(MODEL_KEY, v.trim()) : localStorage.removeItem(MODEL_KEY); } catch {} }
 };
+
+// A key copied on iPhone can carry invisible characters (spaces, line breaks, zero-width marks).
+// Those make fetch fail before anything is sent, which looks like "no internet". Keep only key characters.
+function cleanKey(v) { return String(v).replace(/[^A-Za-z0-9._\-]/g, ""); }
 
 export class AiError extends Error { constructor(message, code) { super(message); this.code = code; } }
 
@@ -40,16 +44,26 @@ export async function generateJson({ prompt, image }) {
   let models = settings.getModel() ? [settings.getModel()] : [...new Set([found, ...DEFAULT_MODELS].filter(Boolean))];
   let last, discovered = false;
   let lastDetail = "";
+  // viaQuery: key in the URL and a "simple" request (text/plain, no custom header), so the browser sends no preflight.
   const call = (model, viaQuery) => fetch(`${API}/${encodeURIComponent(model)}:generateContent` + (viaQuery ? `?key=${encodeURIComponent(key)}` : ""), {
     method: "POST",
-    headers: viaQuery ? { "content-type": "application/json" } : { "content-type": "application/json", "x-goog-api-key": key },
+    headers: viaQuery ? { "content-type": "text/plain;charset=UTF-8" } : { "content-type": "application/json", "x-goog-api-key": key },
     body
   });
   let viaQuery = false;
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
     let res;
-    try { res = await call(model, viaQuery); } catch { throw new AiError("Geen verbinding met Gemini. Controleer je internet.", "network"); }
+    try { res = await call(model, viaQuery); }
+    catch (err) {
+      // Try once more as a simple request before blaming the connection.
+      try { res = await call(model, true); viaQuery = true; }
+      catch (err2) {
+        const why = (err2 && (err2.name + ": " + err2.message)) || String(err2);
+        const online = typeof navigator !== "undefined" && navigator.onLine === false ? "Je toestel meldt dat het offline is. " : "";
+        throw new AiError(online + "Kon Gemini niet bereiken. Controleer je internet of probeer het zonder VPN/inhoudsblokker. (Technische melding: " + why + ")", "network");
+      }
+    }
     if (!res.ok && i === 0 && !viaQuery && [400, 401, 403, 404].includes(res.status)) {
       // Some keys are only accepted as ?key= parameter: try that once.
       try { const r2 = await call(model, true); if (r2.ok || r2.status !== res.status) { res = r2; viaQuery = true; } } catch {}
