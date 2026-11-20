@@ -192,7 +192,7 @@ footer.foot{font-size:.78rem;color:var(--muted)}
         <div class="filters">
           <label>Bron<select id="fSource"><option value="all">Alle bronnen</option><option value="database">Externe database</option><option value="eigen">Eigen oefeningen / cursus</option></select></label>
           <label>Onderwerp<select id="fTopic"><option value="all">Alle onderwerpen</option></select></label>
-          <label>Moeilijkheid<select id="fDiff"><option value="all">Alle</option><option value="basis">Basis</option><option value="gevorderd">Gevorderd</option></select></label>
+          <label>Moeilijkheid<select id="fDiff"><option value="all">Alle</option><option value="basis">Basis</option><option value="gevorderd">Gevorderd</option><option value="expert">Expert</option></select></label>
           <label class="check" style="flex-direction:row;align-self:end;padding-bottom:10px"><input type="checkbox" id="fWrong"> Enkel eerder fout</label>
         </div>
       </div>
@@ -230,7 +230,7 @@ footer.foot{font-size:.78rem;color:var(--muted)}
           <div><label class="lbl" for="cImg">ECG-afbeelding</label><input type="file" id="cImg" accept="image/*" required></div>
           <div class="filters">
             <label>Onderwerp<select id="cTopic"></select></label>
-            <label>Moeilijkheid<select id="cDiff"><option value="basis">Basis</option><option value="gevorderd">Gevorderd</option></select></label>
+            <label>Moeilijkheid<select id="cDiff"><option value="basis">Basis</option><option value="gevorderd">Gevorderd</option><option value="expert">Expert</option></select></label>
           </div>
           <div><label class="lbl" for="cPatient">Patiënt (leeftijd, geslacht)</label><input type="text" id="cPatient" placeholder="bv. Man, 64 jaar"></div>
           <div><label class="lbl" for="cContext">Klinische context</label><textarea id="cContext" rows="2" placeholder="bv. Palpitaties sinds 2 uur, hemodynamisch stabiel"></textarea></div>
@@ -248,18 +248,18 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot"><span class="mono">Versie 2026-11-20.11</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.12</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
 <script type="module">
-import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=11";
-import { settings } from "./js/gemini.js?v=11";
+import { getFeedback, getInsights, getQuick, withRef } from "./js/ai.js?v=12";
+import { settings } from "./js/gemini.js?v=12";
 (() => {
 "use strict";
 const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const TOPICS = ["Normaal ECG","Sinusritme en sinusaritmieën","Extrasystolen","Voorkamerfibrillatie","Voorkamerflutter","Supraventriculaire tachycardie","AV-blok","Bundeltakblok / hemiblok","Ventriculaire ritmestoornissen","Ischemie","STEMI / infarctlokalisatie","NSTEMI","Hypertrofie","Elektrolytenstoornissen","QT-afwijkingen","WPW","Brugada","Pacemakerritme","Andere"];
+const TOPICS = ["Normaal ECG","Sinusritme en sinusaritmieën","Extrasystolen","Voorkamerfibrillatie","Voorkamerflutter","Supraventriculaire tachycardie","Breed-QRS tachycardie","AV-blok","Bundeltakblok / hemiblok","Ventriculaire ritmestoornissen","Ischemie","STEMI / infarctlokalisatie","Oud infarct","NSTEMI","Hypertrofie","Elektrolytenstoornissen","QT-afwijkingen","WPW","Brugada","Pacemakerritme","Andere"];
 const VLABEL = {correct:"Correct", gedeeltelijk:"Gedeeltelijk correct", fout:"Fout"};
 
 const state = { builtin: [], custom: [], attempts: [], insights: null, current: null, lastCaseId: null, feedback: null, busy: false, course: "" };
@@ -837,7 +837,7 @@ function renderCases() {
 
 function fillTopicFilter() {
   const sel = $("#fTopic"), cur = sel.value, present = new Set(allCases().map(c => c.topic));
-  sel.innerHTML = `<option value="all">Alle onderwerpen</option>` + TOPICS.filter(t => present.has(t)).map(t => `<option>${esc(t)}</option>`).join("");
+  sel.innerHTML = `<option value="all">Alle onderwerpen</option>` + [...TOPICS.filter(t => present.has(t)), ...[...present].filter(t => !TOPICS.includes(t))].map(t => `<option>${esc(t)}</option>`).join("");
   if ([...sel.options].some(o => o.value === cur)) sel.value = cur;
 }
 
@@ -911,7 +911,7 @@ async function start() {
 function confirmLeave() { return true; }
 start();
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=11", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js?v=12", { updateViaCache: "none" }).then(r => r.update()).catch(e => console.warn("sw", e)));
   let reloaded = false;
   navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && !document.querySelector("#reasoning")?.value) { reloaded = true; location.reload(); } });
 }

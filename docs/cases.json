@@ -90,5 +90,929 @@
    "MLII",
    "V5"
   ]
+ },
+ {
+  "id": "ptbxl-00254",
+  "image": "ecg/ptbxl-00254.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 63 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Normaal ECG",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 254 (00254_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00264",
+  "image": "ecg/ptbxl-00264.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 66 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Normaal ECG",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 264 (00264_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00568",
+  "image": "ecg/ptbxl-00568.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 68 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Sinusritme en sinusaritmieën",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 568 (00568_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00698",
+  "image": "ecg/ptbxl-00698.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 64 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Sinusritme en sinusaritmieën",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 698 (00698_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-02087",
+  "image": "ecg/ptbxl-02087.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 14 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Sinusritme en sinusaritmieën",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 2087 (02087_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00330",
+  "image": "ecg/ptbxl-00330.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 61 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Voorkamerfibrillatie",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 330 (00330_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00697",
+  "image": "ecg/ptbxl-00697.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 69 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Voorkamerfibrillatie",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 697 (00697_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00567",
+  "image": "ecg/ptbxl-00567.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 77 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Voorkamerfibrillatie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 567 (00567_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-02739",
+  "image": "ecg/ptbxl-02739.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 89 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Voorkamerflutter",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 2739 (02739_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-06179",
+  "image": "ecg/ptbxl-06179.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 77 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Voorkamerflutter",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 6179 (06179_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-16401",
+  "image": "ecg/ptbxl-16401.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 70 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Voorkamerflutter",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 16401 (16401_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-01919",
+  "image": "ecg/ptbxl-01919.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 65 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Supraventriculaire tachycardie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 1919 (01919_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-07960",
+  "image": "ecg/ptbxl-07960.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 83 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Breed-QRS tachycardie",
+  "difficulty": "expert",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 7960 (07960_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-03658",
+  "image": "ecg/ptbxl-03658.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 67 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "AV-blok",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 3658 (03658_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-01484",
+  "image": "ecg/ptbxl-01484.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 41 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "AV-blok",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 1484 (01484_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-14009",
+  "image": "ecg/ptbxl-14009.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, ouder dan 89 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "AV-blok",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 14009 (14009_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-18101",
+  "image": "ecg/ptbxl-18101.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 75 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "AV-blok",
+  "difficulty": "expert",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 18101 (18101_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00959",
+  "image": "ecg/ptbxl-00959.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 88 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "AV-blok",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 959 (00959_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-08911",
+  "image": "ecg/ptbxl-08911.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 68 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "AV-blok",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 8911 (08911_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00903",
+  "image": "ecg/ptbxl-00903.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 66 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Bundeltakblok / hemiblok",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 903 (00903_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-06282",
+  "image": "ecg/ptbxl-06282.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 42 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Bundeltakblok / hemiblok",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 6282 (06282_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00286",
+  "image": "ecg/ptbxl-00286.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 81 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Bundeltakblok / hemiblok",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 286 (00286_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00338",
+  "image": "ecg/ptbxl-00338.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 69 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Bundeltakblok / hemiblok",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 338 (00338_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00285",
+  "image": "ecg/ptbxl-00285.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 70 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Bundeltakblok / hemiblok",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 285 (00285_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-05794",
+  "image": "ecg/ptbxl-05794.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 59 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Bundeltakblok / hemiblok",
+  "difficulty": "expert",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 5794 (05794_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-10053",
+  "image": "ecg/ptbxl-10053.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 27 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "WPW",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 10053 (10053_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-12559",
+  "image": "ecg/ptbxl-12559.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 63 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "WPW",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 12559 (12559_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00297",
+  "image": "ecg/ptbxl-00297.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 73 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Extrasystolen",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 297 (00297_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00256",
+  "image": "ecg/ptbxl-00256.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, ouder dan 89 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Extrasystolen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 256 (00256_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00763",
+  "image": "ecg/ptbxl-00763.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 65 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Extrasystolen",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 763 (00763_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-01019",
+  "image": "ecg/ptbxl-01019.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 41 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Extrasystolen",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 1019 (01019_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-15535",
+  "image": "ecg/ptbxl-15535.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 67 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Extrasystolen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 15535 (15535_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-02858",
+  "image": "ecg/ptbxl-02858.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 51 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Hypertrofie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 2858 (02858_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-02076",
+  "image": "ecg/ptbxl-02076.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 49 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Hypertrofie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 2076 (02076_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-18093",
+  "image": "ecg/ptbxl-18093.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 23 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "QT-afwijkingen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 18093 (18093_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-11916",
+  "image": "ecg/ptbxl-11916.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 55 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "QT-afwijkingen",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 11916 (11916_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00947",
+  "image": "ecg/ptbxl-00947.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 71 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "STEMI / infarctlokalisatie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 947 (00947_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-02993",
+  "image": "ecg/ptbxl-02993.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 85 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "STEMI / infarctlokalisatie",
+  "difficulty": "expert",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 2993 (02993_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-16951",
+  "image": "ecg/ptbxl-16951.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, ouder dan 89 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "STEMI / infarctlokalisatie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 16951 (16951_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-03314",
+  "image": "ecg/ptbxl-03314.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Vrouw, 59 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "STEMI / infarctlokalisatie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 3314 (03314_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-00290",
+  "image": "ecg/ptbxl-00290.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 73 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Oud infarct",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 290 (00290_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-04380",
+  "image": "ecg/ptbxl-04380.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 68 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Oud infarct",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 4380 (04380_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-03181",
+  "image": "ecg/ptbxl-03181.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 79 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Ischemie",
+  "difficulty": "gevorderd",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 3181 (03181_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
+ },
+ {
+  "id": "ptbxl-01641",
+  "image": "ecg/ptbxl-01641.png",
+  "leads": "12 afleidingen, 10 s",
+  "patient": "Man, 81 jaar",
+  "context": "12-afleidingen-ECG uit PTB-XL. Geen verdere klinische gegevens beschikbaar.",
+  "topic": "Pacemakerritme",
+  "difficulty": "basis",
+  "source": {
+   "kind": "database",
+   "name": "PTB-XL v1.0.3 (PhysioNet)",
+   "record": "ecg_id 1641 (01641_hr, 500 Hz)",
+   "license": "CC BY 4.0. Wagner P. et al., PTB-XL, a large publicly available electrocardiography dataset. Sci Data 2020;7:154.",
+   "url": "https://physionet.org/content/ptb-xl/1.0.3/"
+  },
+  "reference": {
+   "status": "dataset-label",
+   "has_diagnosis": true
+  },
+  "layout": "12"
  }
 ]
