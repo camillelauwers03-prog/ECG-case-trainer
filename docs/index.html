@@ -80,15 +80,25 @@ label.lbl{font-weight:700;display:block;margin-bottom:6px}
 .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
 .filters label{font-size:.78rem;color:var(--muted);display:flex;flex-direction:column;gap:4px}
 .check{display:flex;align-items:center;gap:8px;font-size:.9rem}
-/* ECG viewer */
-.viewer{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden}
-.viewer .scroller{overflow:auto;max-height:70vh;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
-.viewer img{display:block;max-width:none;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
-.viewer .tools{position:absolute;right:8px;top:8px;display:flex;gap:6px}
-.viewer .tools .btn{background:rgba(255,255,255,.92);color:#15202b;border-color:#d7c4bf;min-height:36px;width:36px;padding:0}
-.zoomlvl{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);color:#15202b;border-radius:6px;padding:2px 8px;font-family:var(--f-mono);font-size:.75rem}
-.viewer.full{position:fixed;inset:0;z-index:50;border-radius:0;border:0;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
-.viewer.full .scroller{max-height:none;height:100%}
+/* ECG viewer: own pinch/pan so the page itself never zooms */
+.viewer{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:8px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.viewer img{position:absolute;left:0;top:0;max-width:none;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none;will-change:transform}
+.viewer .zoomlvl{position:absolute;left:8px;top:8px;background:rgba(255,255,255,.92);color:#15202b;border-radius:6px;padding:2px 8px;font-family:var(--f-mono);font-size:.75rem;pointer-events:none}
+.vbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.vbar .btn{min-height:40px;padding:6px 12px}
+.leads{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.leads::-webkit-scrollbar{display:none}
+.leads button{flex:none;font:inherit;font-family:var(--f-mono);font-size:.8rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 11px;min-height:34px;cursor:pointer}
+.leads button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.vfull{position:fixed;inset:0;z-index:60;background:#0c1118;display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+.vfull .viewer{flex:1;border:0;border-radius:0;background:#0c1118}
+.vfull .vtop{display:flex;gap:8px;align-items:center;padding:8px 10px}
+.vfull .vtop .leads{flex:1}
+.vfull .vtop .leads button{background:#1b2531;color:#e7ecf1;border-color:#2b3643}
+.vfull .vtop .leads button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.vfull .close{flex:none;min-height:40px;width:40px;border-radius:999px;border:1px solid #2b3643;background:#1b2531;color:#fff;font-size:1.1rem;cursor:pointer}
+.rotate-hint{color:#9aa6b2;font-size:.8rem;text-align:center;padding:4px 10px 8px}
+@media (orientation:landscape){.rotate-hint{display:none}}
 .facts{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:.92rem}
 .facts dt{color:var(--muted)} .facts dd{margin:0}
 /* Feedback */
@@ -207,7 +217,7 @@ footer.foot{font-size:.78rem;color:var(--muted)}
         <p class="muted" style="margin:0">Maak een sleutel aan op <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com</a> en plak hem hier. Hij wordt alleen op dit toestel bewaard en enkel naar Google gestuurd.</p>
         <form id="keyForm" class="wrap" style="padding:0;gap:8px">
           <div><label class="lbl" for="kKey">API-sleutel</label><input type="password" id="kKey" autocomplete="off" placeholder="Begint meestal met AIza…" style="font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%"></div>
-          <details><summary class="muted" style="cursor:pointer">Geavanceerd</summary><div style="padding-top:8px"><label class="lbl" for="kModel">Model (leeg = automatisch)</label><input type="text" id="kModel" placeholder="gemini-2.5-flash"></div></details>
+          <details><summary class="muted" style="cursor:pointer">Geavanceerd</summary><div style="padding-top:8px"><label class="lbl" for="kModel">Model (leeg = automatisch)</label><input type="text" id="kModel" placeholder="bv. gemini-3.5-flash"></div></details>
           <div class="row"><button class="btn primary" type="submit">Opslaan</button><button class="btn" type="button" id="kClear">Wissen</button></div>
           <div id="keyMsg" class="muted"></div>
         </form>
@@ -359,16 +369,16 @@ function renderPractice() {
       <div class="row">${sourceChip(c)}<span class="chip">${esc(c.leads || "ECG")}</span>${done ? `<span class="chip">${done}× eerder gemaakt</span>` : ""}</div>
       <span class="mono muted">case ${esc(c.id)}</span>
     </div>
-    <div class="viewer" id="viewer">
-      <div class="scroller" id="scroller"><img id="ecgImg" src="${esc(imgSrc(c))}" alt="ECG van deze case" draggable="false"></div>
-      <span class="zoomlvl" id="zoomLvl">100%</span>
-      <div class="tools">
-        <button class="btn" id="zOut" aria-label="Uitzoomen">−</button>
-        <button class="btn" id="zIn" aria-label="Inzoomen">+</button>
-        <button class="btn" id="zFull" aria-label="Volledig scherm">⤢</button>
-      </div>
+    <div id="vhost">
+      <div class="viewer" id="viewer"><img id="ecgImg" src="${esc(imgSrc(c))}" alt="ECG van deze case" draggable="false"><span class="zoomlvl" id="zoomLvl">100%</span></div>
     </div>
-    <p class="muted mono" style="margin:0">Tip: zoom in en scroll opzij om elke afleiding te bekijken. Op je gsm werkt het best in liggende stand.</p>
+    ${leadButtons(c)}
+    <div class="vbar">
+      <button class="btn primary" type="button" id="zFull">Groot bekijken</button>
+      <button class="btn" type="button" id="zOut" aria-label="Uitzoomen">−</button>
+      <button class="btn" type="button" id="zIn" aria-label="Inzoomen">+</button>
+      <span class="muted" style="font-size:.82rem">Knijp om te zoomen, sleep om te verschuiven, dubbeltik om in of uit te zoomen.</span>
+    </div>
     <dl class="facts">
       <dt>Patiënt</dt><dd>${esc(c.patient || "Niet vermeld")}</dd>
       <dt>Context</dt><dd>${esc(c.context || "Geen klinische context beschikbaar")}</dd>
@@ -396,35 +406,127 @@ function renderPractice() {
   if (state.feedback) renderFeedback(state.feedback.fb, state.feedback.attempt);
 }
 
-function c_is12(img) { return state.current && /12 afleidingen/.test(state.current.leads || ""); }
+/* Lead regions as fractions of the rendered image (layout of render.py: 265 x 172 mm, 4 rows of 40 mm). */
+function leadRegions(c) {
+  const out = [];
+  if (c.layout === "12") {
+    const W = 265, H = 172, rows = [["I", "aVR", "V1", "V4"], ["II", "aVL", "V2", "V5"], ["III", "aVF", "V3", "V6"]];
+    const band = r => { const y0 = H - 25 - r * 40; return [(H - (y0 + 19)) / H, (H - (y0 - 19)) / H]; };
+    const order = ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"];
+    order.forEach(name => {
+      const r = rows.findIndex(row => row.includes(name)), col = rows[r].indexOf(name), [t, b] = band(r);
+      out.push({ name, x0: (8 + col * 62.5) / W, x1: (12 + (col + 1) * 62.5) / W, y0: t, y1: b });
+    });
+    const [t, b] = band(3); out.push({ name: "Ritme II", x0: 0, x1: 1, y0: t, y1: b });
+  } else if (c.layout === "strip") {
+    const H = 90, names = c.leadNames || ["Afl. 1", "Afl. 2"];
+    names.forEach((name, i) => { const y0 = H - 25 - i * 40; out.push({ name, x0: 0, x1: 1, y0: (H - (y0 + 19)) / H, y1: (H - (y0 - 19)) / H }); });
+  }
+  return out;
+}
+function leadButtons(c) {
+  const regs = leadRegions(c);
+  if (!regs.length) return "";
+  return `<div class="leads" id="leadBar" role="group" aria-label="Afleiding kiezen"><button type="button" data-lead="all" aria-pressed="true">Alles</button>${regs.map(r => `<button type="button" data-lead="${esc(r.name)}" aria-pressed="false">${esc(r.name)}</button>`).join("")}</div>`;
+}
+
 function setupViewer() {
-  const v = $("#viewer"), img = $("#ecgImg"), sc = $("#scroller");
-  let z = window.innerWidth < 700 && c_is12(img) ? 2.5 : 1;
-  requestAnimationFrame(() => apply());
-  const apply = (cx) => {
-    const ratio = sc.scrollLeft / Math.max(1, sc.scrollWidth - sc.clientWidth);
-    img.style.width = (z * 100) + "%";
-    $("#zoomLvl").textContent = Math.round(z * 100) + "%";
-    sc.scrollLeft = ratio * (sc.scrollWidth - sc.clientWidth);
-  };
-  $("#zIn").onclick = () => { z = Math.min(5, z * 1.5); apply(); };
-  $("#zOut").onclick = () => { z = Math.max(1, z / 1.5); apply(); };
-  $("#zFull").onclick = () => {
-    v.classList.toggle("full");
-    $("#zFull").textContent = v.classList.contains("full") ? "✕" : "⤢";
-    $("#zFull").setAttribute("aria-label", v.classList.contains("full") ? "Sluiten" : "Volledig scherm");
-    document.body.style.overflow = v.classList.contains("full") ? "hidden" : "";
-  };
-  img.addEventListener("dblclick", e => {
-    const r = img.getBoundingClientRect(), fx = (e.clientX - r.left) / r.width, fy = (e.clientY - r.top) / r.height;
-    z = z >= 3 ? 1 : z * 2; apply();
-    sc.scrollLeft = fx * sc.scrollWidth - sc.clientWidth / 2; sc.scrollTop = fy * sc.scrollHeight - sc.clientHeight / 2;
+  const c = state.current, regs = leadRegions(c);
+  const v = $("#viewer"), img = $("#ecgImg"), host = $("#vhost");
+  let ar = 0.65, base = { w: 0, h: 0 }, s = 1, tx = 0, ty = 0, full = null;
+  const box = () => ({ w: v.clientWidth, h: v.clientHeight });
+  function layout() {
+    const { w, h } = box();
+    if (!w) return;
+    if (!full) { v.style.height = Math.round(w * ar) + "px"; }
+    const B = box();
+    const fit = Math.min(B.w / 1, B.h / ar);
+    base = { w: fit, h: fit * ar };
+    img.style.width = base.w + "px"; img.style.height = base.h + "px";
+    clamp(); paint();
+  }
+  function clamp() {
+    const B = box(), sw = base.w * s, sh = base.h * s;
+    tx = sw <= B.w ? (B.w - sw) / 2 : Math.min(0, Math.max(B.w - sw, tx));
+    ty = sh <= B.h ? (B.h - sh) / 2 : Math.min(0, Math.max(B.h - sh, ty));
+  }
+  function paint() {
+    img.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+    $("#zoomLvl", v).textContent = Math.round(s * 100) + "%";
+  }
+  function zoomAt(ns, px, py) {
+    ns = Math.max(1, Math.min(8, ns));
+    const ix = (px - tx) / s, iy = (py - ty) / s;
+    s = ns; tx = px - ix * s; ty = py - iy * s; clamp(); paint();
+  }
+  function showRegion(r) {
+    const B = box();
+    if (!r) { s = 1; tx = ty = 0; clamp(); paint(); return; }
+    const rw = (r.x1 - r.x0) * base.w, rh = (r.y1 - r.y0) * base.h;
+    s = Math.max(1, Math.min(8, Math.min(B.w / rw, B.h / rh)));
+    tx = B.w / 2 - ((r.x0 + r.x1) / 2) * base.w * s;
+    ty = B.h / 2 - ((r.y0 + r.y1) / 2) * base.h * s;
+    clamp(); paint();
+  }
+  function selectLead(name) {
+    document.querySelectorAll("[data-lead]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lead === name)));
+    showRegion(regs.find(r => r.name === name) || null);
+  }
+  // gestures
+  const pts = new Map(); let g = null, lastTap = 0;
+  v.addEventListener("pointerdown", e => {
+    v.setPointerCapture(e.pointerId); pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const R = v.getBoundingClientRect(), P = [...pts.values()];
+    if (P.length === 1) {
+      const now = Date.now();
+      if (now - lastTap < 300) { zoomAt(s > 1.5 ? 1 : 2.5, e.clientX - R.left, e.clientY - R.top); lastTap = 0; g = null; return; }
+      lastTap = now;
+      g = { mode: "pan", x: e.clientX, y: e.clientY, tx, ty };
+    } else if (P.length === 2) {
+      const [a, b] = P, d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2 - R.left, my = (a.y + b.y) / 2 - R.top;
+      g = { mode: "pinch", d, s, ix: (mx - tx) / s, iy: (my - ty) / s };
+    }
   });
-  // drag to pan with mouse
-  let drag = null;
-  sc.addEventListener("mousedown", e => { drag = { x: e.clientX, y: e.clientY, l: sc.scrollLeft, t: sc.scrollTop }; sc.style.cursor = "grabbing"; e.preventDefault(); });
-  window.addEventListener("mouseup", () => { drag = null; sc.style.cursor = ""; });
-  window.addEventListener("mousemove", e => { if (!drag) return; sc.scrollLeft = drag.l - (e.clientX - drag.x); sc.scrollTop = drag.t - (e.clientY - drag.y); });
+  v.addEventListener("pointermove", e => {
+    if (!pts.has(e.pointerId) || !g) return;
+    pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const R = v.getBoundingClientRect(), P = [...pts.values()];
+    if (g.mode === "pan" && P.length === 1) { tx = g.tx + (e.clientX - g.x); ty = g.ty + (e.clientY - g.y); clamp(); paint(); }
+    else if (g.mode === "pinch" && P.length >= 2) {
+      const [a, b] = P, d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2 - R.left, my = (a.y + b.y) / 2 - R.top;
+      s = Math.max(1, Math.min(8, g.s * d / g.d)); tx = mx - g.ix * s; ty = my - g.iy * s; clamp(); paint();
+    }
+  });
+  const end = e => { pts.delete(e.pointerId); if (pts.size === 1) { const [p] = pts.values(); g = { mode: "pan", x: p.x, y: p.y, tx, ty }; } else if (!pts.size) g = null; };
+  v.addEventListener("pointerup", end); v.addEventListener("pointercancel", end);
+  v.addEventListener("wheel", e => { e.preventDefault(); const R = v.getBoundingClientRect(); zoomAt(s * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX - R.left, e.clientY - R.top); }, { passive: false });
+  ["gesturestart", "gesturechange"].forEach(t => v.addEventListener(t, e => e.preventDefault()));
+  // buttons
+  const center = () => { const B = box(); return [B.w / 2, B.h / 2]; };
+  $("#zIn").onclick = () => zoomAt(s * 1.5, ...center());
+  $("#zOut").onclick = () => zoomAt(s / 1.5, ...center());
+  document.querySelectorAll("#leadBar [data-lead]").forEach(b => b.onclick = () => selectLead(b.dataset.lead));
+  // fullscreen overlay
+  function openFull() {
+    full = document.createElement("div"); full.className = "vfull";
+    const bar = $("#leadBar");
+    full.innerHTML = `<div class="vtop"><div class="leads" id="fullLeads">${bar ? bar.innerHTML : ""}</div><button class="close" type="button" aria-label="Sluiten">✕</button></div><div class="rotate-hint">Draai je gsm voor een groter beeld</div>`;
+    full.insertBefore(v, full.children[1]);
+    v.style.height = "";
+    document.body.appendChild(full); document.body.style.overflow = "hidden";
+    full.querySelector(".close").onclick = closeFull;
+    full.querySelectorAll("[data-lead]").forEach(b => b.onclick = () => selectLead(b.dataset.lead));
+    s = 1; layout();
+  }
+  function closeFull() {
+    host.appendChild(v); full.remove(); full = null; document.body.style.overflow = "";
+    s = 1; layout(); document.querySelectorAll("[data-lead]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lead === "all")));
+  }
+  $("#zFull").onclick = openFull;
+  const onResize = () => { if (v.isConnected) layout(); else window.removeEventListener("resize", onResize); };
+  window.addEventListener("resize", onResize);
+  const ready = () => { ar = img.naturalHeight / img.naturalWidth || ar; layout(); };
+  if (img.complete && img.naturalWidth) ready(); else img.onload = ready;
 }
 
 async function imageBlob(c) {

@@ -17,7 +17,8 @@
   "reference": {
    "status": "dataset-label",
    "has_diagnosis": true
-  }
+  },
+  "layout": "12"
  },
  {
   "id": "ptb-s0010",
@@ -37,7 +38,8 @@
   "reference": {
    "status": "dataset-label",
    "has_diagnosis": true
-  }
+  },
+  "layout": "12"
  },
  {
   "id": "mitdb-100-a",
@@ -57,7 +59,12 @@
   "reference": {
    "status": "expert-annotatie",
    "has_diagnosis": true
-  }
+  },
+  "layout": "strip",
+  "leadNames": [
+   "MLII",
+   "V5"
+  ]
  },
  {
   "id": "mitdb-100-v",
@@ -77,6 +84,11 @@
   "reference": {
    "status": "expert-annotatie",
    "has_diagnosis": true
-  }
+  },
+  "layout": "strip",
+  "leadNames": [
+   "MLII",
+   "V5"
+  ]
  }
 ]
