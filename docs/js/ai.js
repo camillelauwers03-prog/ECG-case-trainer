@@ -1,6 +1,6 @@
-import refs from "./refs.js";
-import { feedbackPrompt, insightsPrompt } from "./prompts.js";
-import { generateJson } from "./gemini.js";
+import refs from "./refs.js?v=7";
+import { feedbackPrompt, insightsPrompt } from "./prompts.js?v=7";
+import { generateJson } from "./gemini.js?v=7";
 
 export async function getFeedback(caseData, reasoning, dx, image) {
   const c = { ...caseData };
