@@ -39,14 +39,37 @@ export async function generateJson({ prompt, image }) {
   let found = ""; try { found = localStorage.getItem(FOUND_KEY) || ""; } catch {}
   let models = settings.getModel() ? [settings.getModel()] : [...new Set([found, ...DEFAULT_MODELS].filter(Boolean))];
   let last, discovered = false;
+  let lastDetail = "";
+  const call = (model, viaQuery) => fetch(`${API}/${encodeURIComponent(model)}:generateContent` + (viaQuery ? `?key=${encodeURIComponent(key)}` : ""), {
+    method: "POST",
+    headers: viaQuery ? { "content-type": "application/json" } : { "content-type": "application/json", "x-goog-api-key": key },
+    body
+  });
+  let viaQuery = false;
   for (let i = 0; i < models.length; i++) {
     const model = models[i];
     let res;
-    try {
-      res = await fetch(`${API}/${encodeURIComponent(model)}:generateContent`, { method: "POST", headers: { "content-type": "application/json", "x-goog-api-key": key }, body });
-    } catch { throw new AiError("Geen verbinding met Gemini. Controleer je internet.", "network"); }
-    if (res.status === 404) {
-      last = new AiError(`Model ${model} is niet beschikbaar.`, "model");
+    try { res = await call(model, viaQuery); } catch { throw new AiError("Geen verbinding met Gemini. Controleer je internet.", "network"); }
+    if (!res.ok && i === 0 && !viaQuery && [400, 401, 403, 404].includes(res.status)) {
+      // Some keys are only accepted as ?key= parameter: try that once.
+      try { const r2 = await call(model, true); if (r2.ok || r2.status !== res.status) { res = r2; viaQuery = true; } } catch {}
+    }
+    if (res.ok) {
+      const data = await res.json();
+      const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
+      if (!text) throw new AiError("Gemini gaf een leeg antwoord. Probeer opnieuw.", "empty");
+      try { localStorage.setItem(FOUND_KEY, model); } catch {}
+      return { json: parseJson(text), model };
+    }
+    const errText = await res.text().catch(() => "");
+    let gmsg = ""; try { gmsg = JSON.parse(errText).error.message; } catch { gmsg = errText.slice(0, 200); }
+    lastDetail = `${model}: fout ${res.status}${gmsg ? " – " + gmsg : ""}`;
+    console.warn("Gemini", lastDetail);
+    if (res.status === 429) throw new AiError("De gratis limiet van Gemini is even bereikt. Wacht een minuut en probeer opnieuw. (" + lastDetail + ")", "rate_limited");
+    if ([400, 401, 403].includes(res.status) && /api key|api_key|permission|unauthenticated|credential/i.test(gmsg)) {
+      throw new AiError("Google aanvaardt je sleutel niet. " + keyHint(key) + " (Melding van Google: " + lastDetail + ")", "bad_key");
+    }
+    if (res.status === 404 || res.status === 400) {
       if (i === models.length - 1 && !discovered) {
         discovered = true;
         const more = (await discoverModels(key)).filter(m => !models.includes(m));
@@ -54,20 +77,14 @@ export async function generateJson({ prompt, image }) {
       }
       continue;
     }
-    if (res.status === 429) throw new AiError("De gratis limiet van Gemini is even bereikt. Wacht een minuut en probeer opnieuw.", "rate_limited");
-    if (res.status === 400 || res.status === 401 || res.status === 403) {
-      const t = await res.text().catch(() => "");
-      if (/API key|API_KEY|PERMISSION/i.test(t)) throw new AiError("Je Gemini-sleutel werkt niet. Kijk hem na bij Cases > Instellingen.", "bad_key");
-      throw new AiError(`Gemini weigerde de aanvraag (${res.status}).`, "upstream");
-    }
-    if (!res.ok) throw new AiError(`Gemini gaf fout ${res.status}. Probeer opnieuw.`, "upstream");
-    const data = await res.json();
-    const text = (data.candidates?.[0]?.content?.parts || []).map(p => p.text || "").join("");
-    if (!text) throw new AiError("Gemini gaf een leeg antwoord. Probeer opnieuw.", "empty");
-    try { localStorage.setItem(FOUND_KEY, model); } catch {}
-    return { json: parseJson(text), model };
+    throw new AiError("Gemini gaf een fout. Probeer opnieuw. (" + lastDetail + ")", "upstream");
   }
-  throw new AiError("Geen enkel Gemini-model werkte met je sleutel. Vul eventueel zelf een modelnaam in bij Cases > Instellingen > Geavanceerd.", "model");
+  throw new AiError("Geen enkel Gemini-model werkte met je sleutel. " + keyHint(key) + (lastDetail ? " (Laatste melding van Google: " + lastDetail + ")" : ""), "model");
+}
+
+function keyHint(key) {
+  return /^AIza/.test(key) ? "Kijk na of je de volledige sleutel hebt geplakt."
+    : "Een sleutel uit Google AI Studio begint normaal met AIza. Maak er een aan via aistudio.google.com > Get API key > Create API key en plak die bij Cases > Instellingen.";
 }
 
 function parseJson(text) {

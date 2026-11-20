@@ -247,7 +247,7 @@ footer.foot{font-size:.78rem;color:var(--muted)}
     </div>
   </section>
 
-  <footer class="foot">Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
+  <footer class="foot"><span class="mono">Versie 2026-11-20.5</span> · Voor eigen studiegebruik. Geen klinisch hulpmiddel. Feedback door Google Gemini (gratis versie); controleer bij twijfel met Claude. ECG-signalen: PhysioNet (PTB-XL, PTB Diagnostic ECG Database, MIT-BIH Arrhythmia Database), gerenderd op standaard ECG-papier. Cursusmateriaal: Cardiologie_samenvatting2 (H2 Het ECG, H11 Ritmestoornissen).</footer>
 </div>
 </div>
 
@@ -824,7 +824,7 @@ async function downscale(file) {
 
 function setupKeyForm() {
   const k = $("#kKey"), m = $("#kModel"), msg = $("#keyMsg");
-  const show = () => { msg.textContent = settings.getKey() ? "Sleutel opgeslagen op dit toestel." : "Nog geen sleutel ingevuld."; };
+  const show = () => { const k0 = settings.getKey(); msg.textContent = !k0 ? "Nog geen sleutel ingevuld." : /^AIza/.test(k0) ? "Sleutel opgeslagen op dit toestel." : "Opgeslagen, maar let op: een sleutel uit Google AI Studio begint normaal met AIza. Deze lijkt een ander soort code."; };
   k.value = settings.getKey(); m.value = settings.getModel(); show();
   $("#keyForm").addEventListener("submit", e => { e.preventDefault(); settings.setKey(k.value); settings.setModel(m.value); show(); renderPractice(); });
   $("#kClear").onclick = () => { settings.setKey(""); k.value = ""; show(); };
@@ -884,7 +884,9 @@ async function start() {
 function confirmLeave() { return true; }
 start();
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(e => console.warn("sw", e)));
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").then(r => r.update()).catch(e => console.warn("sw", e)));
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (!reloaded && !document.querySelector("#reasoning")?.value) { reloaded = true; location.reload(); } });
 }
 })();
 </script>
